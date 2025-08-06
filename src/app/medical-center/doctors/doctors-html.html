@@ -1,0 +1,222 @@
+<div class="flex flex-col flex-auto min-w-0">
+
+    <!-- Page header -->
+    <div class="page-header">
+        <!-- Left column: back + title + info -->
+        <div class="flex-1 min-w-0">
+            <div class="flex items-center mb-2">
+                <!-- back button -->
+                <button mat-icon-button (click)="goBack()" class="mr-2">
+                    <mat-icon svgIcon="heroicons_outline:arrow-left"></mat-icon>
+                </button>
+
+                <!-- title -->
+                <h2 class="page-title">
+                    Врачи
+                </h2>
+            </div>
+
+            <!-- counter -->
+            <div class="info">
+                <mat-icon class="icon-size-5 text-secondary" svgIcon="heroicons_solid:users"></mat-icon>
+                <span class="ml-1.5 leading-6 text-secondary">
+                    {{ doctors.length }} специалистов
+                </span>
+            </div>
+        </div>
+
+        <!-- Right column: actions -->
+        <div class="actions">
+            <button mat-icon-button [matTooltip]="viewMode === 'grid' ? 'Список' : 'Сетка'" (click)="toggleViewMode()">
+                <mat-icon [svgIcon]="viewMode === 'grid'
+                               ? 'heroicons_outline:view-list'
+                               : 'heroicons_outline:view-grid'"></mat-icon>
+            </button>
+
+            <button mat-raised-button color="primary" class="ml-3">
+                <mat-icon class="icon-size-5 mr-2" svgIcon="heroicons_solid:plus"></mat-icon>
+                Добавить врача
+            </button>
+        </div>
+    </div>
+
+    <!-- Search / фильтры -->
+    <div class="p-6 sm:p-8 border-b bg-card dark:bg-transparent">
+        <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+
+            <!-- Search -->
+            <mat-form-field class="fuse-mat-dense fuse-mat-rounded flex-auto sm:flex-1">
+                <mat-icon matPrefix svgIcon="heroicons_outline:search"></mat-icon>
+                <input matInput [(ngModel)]="searchQuery" (keyup)="applyFilter($event)"
+                    placeholder="Поиск по имени или специальности">
+            </mat-form-field>
+
+            <!-- Specialty filter -->
+            <mat-form-field class="fuse-mat-dense fuse-mat-rounded w-full sm:w-60">
+                <mat-select [(value)]="selectedSpecialty" (selectionChange)="filterBySpecialty($event.value)">
+                    <mat-option value="all">Все специальности</mat-option>
+                    <mat-option *ngFor="let spec of specialties" [value]="spec">
+                        {{ spec }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="p-6 sm:p-8">
+
+        <!-- Grid View -->
+        <div *ngIf="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <fuse-card *ngFor="let doctor of dataSource.filteredData" class="flex flex-col">
+                <div class="flex items-center p-6 pb-0">
+                    <img [src]="doctor.avatar" [alt]="doctor.name" class="w-20 h-20 rounded-full">
+                    <div class="ml-4 flex-1">
+                        <div class="text-lg font-medium">{{ doctor.name }}</div>
+                        <div class="text-sm font-medium text-primary">{{ doctor.specialty }}</div>
+                        <div class="text-sm text-secondary">{{ doctor.experience }}</div>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <mat-chip [ngClass]="getStatusColor(doctor.status)" class="text-xs">
+                            {{ getStatusText(doctor.status) }}
+                        </mat-chip>
+                    </div>
+                </div>
+
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center">
+                            <mat-icon class="icon-size-5 text-amber-500 mr-1"
+                                [svgIcon]="'heroicons_solid:star'"></mat-icon>
+                            <span class="font-medium">{{ doctor.rating }}</span>
+                            <span class="ml-1 text-sm text-secondary">({{ doctor.reviews }} отзывов)</span>
+                        </div>
+                        <span class="text-lg font-semibold text-primary">{{ doctor.price }}</span>
+                    </div>
+
+                    <div class="flex items-center text-sm text-secondary mb-1">
+                        <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_outline:mail'"></mat-icon>
+                        {{ doctor.email }}
+                    </div>
+
+                    <div class="flex items-center text-sm text-secondary mb-4">
+                        <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_outline:phone'"></mat-icon>
+                        {{ doctor.phone }}
+                    </div>
+
+                    <div class="pt-4 border-t flex items-center justify-between">
+                        <div class="flex items-center text-sm text-secondary">
+                            <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_outline:clock'"></mat-icon>
+                            {{ doctor.nextSlot }}
+                        </div>
+                        <div class="flex items-center space-x-1">
+                            <button mat-icon-button [routerLink]="['/medical-center/doctors', doctor.id]"
+                                matTooltip="Подробнее">
+                                <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                            </button>
+                            <button mat-icon-button [routerLink]="['/medical-center/appointments/booking', doctor.id]"
+                                matTooltip="Записать пациента" [disabled]="doctor.status !== 'available'">
+                                <mat-icon [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </fuse-card>
+        </div>
+
+        <!-- List View -->
+        <div *ngIf="viewMode === 'list'" class="bg-card shadow rounded-lg overflow-hidden">
+            <table mat-table [dataSource]="dataSource" matSort class="w-full">
+
+                <!-- Doctor Column -->
+                <ng-container matColumnDef="doctor">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Врач</th>
+                    <td mat-cell *matCellDef="let doctor">
+                        <div class="flex items-center py-2">
+                            <img [src]="doctor.avatar" [alt]="doctor.name" class="w-10 h-10 rounded-full mr-3">
+                            <div>
+                                <div class="font-medium">{{ doctor.name }}</div>
+                                <div class="text-sm text-secondary">{{ doctor.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <!-- Specialty Column -->
+                <ng-container matColumnDef="specialty">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Специальность</th>
+                    <td mat-cell *matCellDef="let doctor">
+                        <div class="font-medium text-primary">{{ doctor.specialty }}</div>
+                        <div class="text-sm text-secondary">{{ doctor.experience }}</div>
+                    </td>
+                </ng-container>
+
+                <!-- Rating Column -->
+                <ng-container matColumnDef="rating">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Рейтинг</th>
+                    <td mat-cell *matCellDef="let doctor">
+                        <div class="flex items-center">
+                            <mat-icon class="icon-size-5 text-amber-500 mr-1"
+                                [svgIcon]="'heroicons_solid:star'"></mat-icon>
+                            <span class="font-medium">{{ doctor.rating }}</span>
+                            <span class="ml-1 text-sm text-secondary">({{ doctor.reviews }})</span>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <!-- Price Column -->
+                <ng-container matColumnDef="price">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Стоимость</th>
+                    <td mat-cell *matCellDef="let doctor" class="font-semibold">
+                        {{ doctor.price }}
+                    </td>
+                </ng-container>
+
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Статус</th>
+                    <td mat-cell *matCellDef="let doctor">
+                        <mat-chip [ngClass]="getStatusColor(doctor.status)" class="text-xs">
+                            {{ getStatusText(doctor.status) }}
+                        </mat-chip>
+                    </td>
+                </ng-container>
+
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Действия</th>
+                    <td mat-cell *matCellDef="let doctor">
+                        <button mat-icon-button [routerLink]="['/medical-center/doctors', doctor.id]"
+                            matTooltip="Подробнее">
+                            <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                        </button>
+                        <button mat-icon-button [routerLink]="['/medical-center/appointments/booking', doctor.id]"
+                            matTooltip="Записать" [disabled]="doctor.status !== 'available'">
+                            <mat-icon [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+                        </button>
+                        <button mat-icon-button [matMenuTriggerFor]="menu">
+                            <mat-icon [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
+                        </button>
+                        <mat-menu #menu="matMenu">
+                            <button mat-menu-item>
+                                <mat-icon [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                                <span>Редактировать</span>
+                            </button>
+                            <button mat-menu-item class="text-warn">
+                                <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                <span>Удалить</span>
+                            </button>
+                        </mat-menu>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                    class="hover:bg-gray-50 dark:hover:bg-gray-900"></tr>
+            </table>
+
+            <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="10" showFirstLastButtons>
+            </mat-paginator>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,98 @@
+app-booking {
+    // Stepper customization
+    ::ng-deep {
+        .mat-stepper-horizontal {
+            @apply rounded-2xl overflow-hidden;
+            
+            .mat-horizontal-stepper-header-container {
+                @apply bg-gray-50 dark:bg-gray-900 px-6 py-4;
+            }
+            
+            .mat-step-header {
+                @apply transition-all duration-300;
+                
+                &:hover:not(.mat-step-header-selected) {
+                    @apply bg-gray-100 dark:bg-gray-800 rounded-lg;
+                }
+                
+                .mat-step-icon {
+                    @apply bg-gray-300 dark:bg-gray-700;
+                }
+                
+                &.mat-step-header-selected {
+                    .mat-step-icon {
+                        @apply bg-primary;
+                    }
+                }
+            }
+        }
+    }
+    
+    // Time slots grid
+    .time-slots-grid {
+        @apply grid grid-cols-3 sm:grid-cols-4 gap-2;
+        
+        button {
+            @apply py-2 px-3 rounded-lg border text-sm font-medium transition-all duration-200;
+            
+            &.time-slot-available {
+                @apply border-gray-300 hover:border-primary hover:bg-primary-50 dark:border-gray-600;
+                @apply dark:hover:bg-primary-900/20 cursor-pointer;
+            }
+            
+            &.time-slot-selected {
+                @apply bg-primary text-white border-primary;
+                @apply hover:bg-primary-600 transform scale-105;
+            }
+            
+            &.time-slot-disabled {
+                @apply bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed;
+                @apply dark:bg-gray-800 dark:text-gray-600 dark:border-gray-700;
+            }
+        }
+    }
+    
+    // Doctor info card
+    .doctor-info-card {
+        @apply relative overflow-hidden;
+        
+        &::before {
+            content: '';
+            @apply absolute top-0 right-0 w-32 h-32;
+            @apply bg-gradient-to-br from-primary-100 to-transparent;
+            @apply rounded-full transform translate-x-16 -translate-y-16;
+            @apply dark:from-primary-900/30;
+        }
+    }
+    
+    // Form fields
+    .mat-mdc-form-field {
+        @apply w-full;
+    }
+    
+    // Confirmation summary
+    .confirmation-summary {
+        .summary-item {
+            @apply flex justify-between py-2 border-b border-gray-200 dark:border-gray-700;
+            
+            &:last-child {
+                @apply border-b-0;
+            }
+            
+            .label {
+                @apply text-gray-600 dark:text-gray-400;
+            }
+            
+            .value {
+                @apply font-medium text-gray-900 dark:text-gray-100;
+            }
+        }
+    }
+    
+    // Loading state
+    .loading-overlay {
+        @apply absolute inset-0 bg-white/80 dark:bg-gray-900/80;
+        @apply flex items-center justify-center z-10;
+        @apply backdrop-blur-sm;
+    }
+}

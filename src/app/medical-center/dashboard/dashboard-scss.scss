@@ -1,0 +1,64 @@
+app-dashboard {
+    // Stat cards with gradient overlays
+    .stat-card {
+        position: relative;
+        overflow: hidden;
+        
+        &::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(var(--fuse-primary-rgb), 0.1) 0%, transparent 70%);
+            transform: scale(0);
+            transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        &:hover {
+            &::before {
+                transform: scale(1);
+            }
+        }
+    }
+    
+    // Doctor cards
+    .doctor-card {
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        
+        &:hover {
+            transform: translateY(-4px);
+            
+            .doctor-avatar {
+                transform: scale(1.05);
+            }
+        }
+        
+        .doctor-avatar {
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+    }
+    
+    // Appointment list
+    .appointment-item {
+        position: relative;
+        
+        &::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 2px;
+            background: var(--fuse-primary);
+            transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        &:hover {
+            &::after {
+                width: 100%;
+            }
+        }
+    }
+}

@@ -1,0 +1,229 @@
+<div class="flex flex-col flex-auto min-w-0">
+    
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:py-8 sm:px-10 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                Записи на прием
+            </h2>
+            <div class="flex items-center mt-1">
+                <mat-icon class="icon-size-5 text-secondary" [svgIcon]="'heroicons_solid:calendar'"></mat-icon>
+                <div class="ml-1.5 leading-6 text-secondary">
+                    Всего записей: {{ appointments.length }}
+                </div>
+            </div>
+        </div>
+        <!-- Actions -->
+        <div class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
+            <button mat-stroked-button class="mr-3">
+                <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:download'"></mat-icon>
+                Экспорт
+            </button>
+            <button mat-raised-button 
+                    [color]="'primary'"
+                    [routerLink]="['/medical-center/appointments/booking', 1]">
+                <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_solid:plus'"></mat-icon>
+                Новая запись
+            </button>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex-auto p-6 sm:p-10">
+        
+        <!-- Tabs -->
+        <mat-tab-group class="w-full">
+            
+            <!-- Today Tab -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <span class="flex items-center">
+                        Сегодня
+                        <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-700 dark:bg-primary-800 dark:text-primary-300">
+                            {{ todayAppointments.length }}
+                        </span>
+                    </span>
+                </ng-template>
+                
+                <div class="pt-6">
+                    <div *ngIf="todayAppointments.length === 0" class="text-center py-12">
+                        <mat-icon class="icon-size-16 text-gray-400 mb-4" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+                        <p class="text-gray-500">На сегодня записей нет</p>
+                    </div>
+                    
+                    <div *ngIf="todayAppointments.length > 0" class="grid grid-cols-1 gap-4">
+                        <fuse-card *ngFor="let appointment of todayAppointments" 
+                                   class="appointment-card p-6"
+                                   [ngClass]="'status-' + appointment.status">
+                            <div class="flex items-start">
+                                <div class="flex-auto">
+                                    <div class="flex items-center mb-2">
+                                        <h4 class="text-lg font-semibold">{{ appointment.patientName }}</h4>
+                                        <mat-chip class="ml-3" [ngClass]="getStatusColor(appointment.status)">
+                                            {{ getStatusText(appointment.status) }}
+                                        </mat-chip>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                                        <div>
+                                            <div class="flex items-center text-secondary mb-1">
+                                                <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_outline:user'"></mat-icon>
+                                                Врач: {{ appointment.doctorName }}
+                                            </div>
+                                            <div class="text-primary font-medium">{{ appointment.doctorSpecialty }}</div>
+                                        </div>
+                                        
+                                        <div>
+                                            <div class="flex items-center text-secondary mb-1">
+                                                <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_outline:clock'"></mat-icon>
+                                                Время: {{ appointment.time }}
+                                            </div>
+                                            <div class="font-medium">{{ appointment.price }}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center mt-3 text-sm text-secondary">
+                                        <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_outline:phone'"></mat-icon>
+                                        {{ appointment.phone }}
+                                        <span class="mx-2">•</span>
+                                        <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_outline:mail'"></mat-icon>
+                                        {{ appointment.email }}
+                                    </div>
+                                </div>
+                                
+                                <div class="ml-4">
+                                    <button mat-icon-button [matMenuTriggerFor]="menu">
+                                        <mat-icon [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
+                                    </button>
+                                    <mat-menu #menu="matMenu">
+                                        <button mat-menu-item>
+                                            <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                                            <span>Подробнее</span>
+                                        </button>
+                                        <button mat-menu-item *ngIf="appointment.status === 'pending'"
+                                                (click)="confirmAppointment(appointment)">
+                                            <mat-icon [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                                            <span>Подтвердить</span>
+                                        </button>
+                                        <button mat-menu-item>
+                                            <mat-icon [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                                            <span>Изменить</span>
+                                        </button>
+                                        <button mat-menu-item class="text-warn"
+                                                *ngIf="appointment.status !== 'cancelled'"
+                                                (click)="cancelAppointment(appointment)">
+                                            <mat-icon [svgIcon]="'heroicons_outline:x'"></mat-icon>
+                                            <span>Отменить</span>
+                                        </button>
+                                    </mat-menu>
+                                </div>
+                            </div>
+                        </fuse-card>
+                    </div>
+                </div>
+            </mat-tab>
+            
+            <!-- Upcoming Tab -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <span class="flex items-center">
+                        Предстоящие
+                        <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                            {{ upcomingAppointments.length }}
+                        </span>
+                    </span>
+                </ng-template>
+                
+                <div class="pt-6">
+                    <!-- Similar structure as Today tab -->
+                    <div *ngIf="upcomingAppointments.length === 0" class="text-center py-12">
+                        <mat-icon class="icon-size-16 text-gray-400 mb-4" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+                        <p class="text-gray-500">Нет предстоящих записей</p>
+                    </div>
+                </div>
+            </mat-tab>
+            
+            <!-- Past Tab -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <span class="flex items-center">
+                        Прошедшие
+                        <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                            {{ pastAppointments.length }}
+                        </span>
+                    </span>
+                </ng-template>
+                
+                <div class="pt-6">
+                    <!-- Table view for past appointments -->
+                    <div class="overflow-x-auto">
+                        <table mat-table [dataSource]="pastAppointments" class="w-full">
+                            
+                            <!-- ID Column -->
+                            <ng-container matColumnDef="id">
+                                <th mat-header-cell *matHeaderCellDef>ID</th>
+                                <td mat-cell *matCellDef="let appointment">{{ appointment.id }}</td>
+                            </ng-container>
+                            
+                            <!-- Patient Column -->
+                            <ng-container matColumnDef="patient">
+                                <th mat-header-cell *matHeaderCellDef>Пациент</th>
+                                <td mat-cell *matCellDef="let appointment">
+                                    <div>
+                                        <div class="font-medium">{{ appointment.patientName }}</div>
+                                        <div class="text-sm text-secondary">{{ appointment.phone }}</div>
+                                    </div>
+                                </td>
+                            </ng-container>
+                            
+                            <!-- Doctor Column -->
+                            <ng-container matColumnDef="doctor">
+                                <th mat-header-cell *matHeaderCellDef>Врач</th>
+                                <td mat-cell *matCellDef="let appointment">
+                                    <div>
+                                        <div class="font-medium">{{ appointment.doctorName }}</div>
+                                        <div class="text-sm text-primary">{{ appointment.doctorSpecialty }}</div>
+                                    </div>
+                                </td>
+                            </ng-container>
+                            
+                            <!-- Date Time Column -->
+                            <ng-container matColumnDef="dateTime">
+                                <th mat-header-cell *matHeaderCellDef>Дата и время</th>
+                                <td mat-cell *matCellDef="let appointment">
+                                    {{ appointment.date | date:'dd.MM.yyyy' }} в {{ appointment.time }}
+                                </td>
+                            </ng-container>
+                            
+                            <!-- Status Column -->
+                            <ng-container matColumnDef="status">
+                                <th mat-header-cell *matHeaderCellDef>Статус</th>
+                                <td mat-cell *matCellDef="let appointment">
+                                    <mat-chip [ngClass]="getStatusColor(appointment.status)">
+                                        {{ getStatusText(appointment.status) }}
+                                    </mat-chip>
+                                </td>
+                            </ng-container>
+                            
+                            <!-- Actions Column -->
+                            <ng-container matColumnDef="actions">
+                                <th mat-header-cell *matHeaderCellDef>Действия</th>
+                                <td mat-cell *matCellDef="let appointment">
+                                    <button mat-icon-button>
+                                        <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                                    </button>
+                                    <button mat-icon-button>
+                                        <mat-icon [svgIcon]="'heroicons_outline:document-download'"></mat-icon>
+                                    </button>
+                                </td>
+                            </ng-container>
+                            
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                        </table>
+                    </div>
+                </div>
+            </mat-tab>
+        </mat-tab-group>
+    </div>
+</div>

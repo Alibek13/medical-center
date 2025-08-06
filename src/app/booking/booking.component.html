@@ -1,0 +1,545 @@
+<!-- booking.component.html -->
+<div class="booking-page">
+  <!-- Modern Header -->
+  <header class="booking-header">
+    <div class="header-container">
+      <div class="header-content">
+        <button mat-icon-button routerLink="/landing" class="back-button">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="header-text">
+          <h1>Онлайн-запись к врачу</h1>
+          <p>MedCenter - Ваше здоровье в надежных руках</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="booking-container">
+    <!-- Mobile Progress -->
+    <div class="mobile-progress-wrapper lg:hidden">
+      <div class="mobile-progress">
+        <div class="progress-info">
+          <span class="step-number">Шаг {{ currentStep() + 1 }} из 4</span>
+          <span class="step-name">{{ getStepName(currentStep()) }}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="((currentStep() + 1) / 4) * 100"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="booking-grid">
+      <!-- Desktop Stepper Sidebar -->
+      <aside class="stepper-sidebar hidden lg:block">
+        <div class="stepper-card">
+          <h3 class="stepper-title">Процесс записи</h3>
+          <div class="stepper-container">
+            <div class="stepper-steps">
+              <!-- Step 1 -->
+              <div class="step-item" 
+                   [class.active]="currentStep() === 0"
+                   [class.completed]="currentStep() > 0"
+                   (click)="currentStep() > 0 && (currentStep.set(0))">
+                <div class="step-number">
+                  <mat-icon *ngIf="currentStep() > 0">check</mat-icon>
+                  <span *ngIf="currentStep() <= 0">1</span>
+                </div>
+                <div class="step-content">
+                  <p class="step-title">Выбор специалиста</p>
+                  <p class="step-desc">Найдите нужного врача</p>
+                </div>
+              </div>
+
+              <!-- Step 2 -->
+              <div class="step-item" 
+                   [class.active]="currentStep() === 1"
+                   [class.completed]="currentStep() > 1"
+                   [class.disabled]="currentStep() < 1">
+                <div class="step-number">
+                  <mat-icon *ngIf="currentStep() > 1">check</mat-icon>
+                  <span *ngIf="currentStep() <= 1">2</span>
+                </div>
+                <div class="step-content">
+                  <p class="step-title">Дата и время</p>
+                  <p class="step-desc">Выберите удобное время</p>
+                </div>
+              </div>
+
+              <!-- Step 3 -->
+              <div class="step-item" 
+                   [class.active]="currentStep() === 2"
+                   [class.completed]="currentStep() > 2"
+                   [class.disabled]="currentStep() < 2">
+                <div class="step-number">
+                  <mat-icon *ngIf="currentStep() > 2">check</mat-icon>
+                  <span *ngIf="currentStep() <= 2">3</span>
+                </div>
+                <div class="step-content">
+                  <p class="step-title">Ваши данные</p>
+                  <p class="step-desc">Контактная информация</p>
+                </div>
+              </div>
+
+              <!-- Step 4 -->
+              <div class="step-item" 
+                   [class.active]="currentStep() === 3"
+                   [class.completed]="currentStep() > 3"
+                   [class.disabled]="currentStep() < 3">
+                <div class="step-number">
+                  <mat-icon>{{ currentStep() > 3 ? 'check' : 'fact_check' }}</mat-icon>
+                </div>
+                <div class="step-content">
+                  <p class="step-title">Подтверждение</p>
+                  <p class="step-desc">Проверка данных</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="booking-main">
+        <!-- Step 1: Choose Doctor -->
+        <div class="booking-card fade-in" *ngIf="currentStep() === 0">
+          <div class="card-header">
+            <h2>Выберите специалиста</h2>
+            <p>Найдите врача по специализации или имени</p>
+          </div>
+          
+          <div class="card-content">
+            <form [formGroup]="selectForm">
+              <!-- Filters -->
+              <div class="filters-grid">
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Специальность</mat-label>
+                  <mat-icon matPrefix>category</mat-icon>
+                  <mat-select formControlName="specialty">
+                    <mat-option value="all">
+                      <mat-icon>apps</mat-icon>
+                      Все специальности
+                    </mat-option>
+                    <mat-option *ngFor="let s of specialties()" [value]="s">
+                      {{ s }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Поиск по имени</mat-label>
+                  <mat-icon matPrefix>search</mat-icon>
+                  <input matInput 
+                         placeholder="Введите имя врача"
+                         (input)="onSearchChange($event.target.value)">
+                </mat-form-field>
+              </div>
+
+              <!-- Doctors List -->
+              <div class="doctors-list">
+                <div *ngFor="let doctor of filteredDoctors()" 
+                     class="doctor-card"
+                     [class.selected]="selectForm.value.doctorId === doctor.id"
+                     (click)="selectDoctor(doctor)">
+                  <div class="doctor-info">
+                    <img [src]="getAvatarUrl(doctor.name)" 
+                         [alt]="doctor.name"
+                         class="doctor-avatar">
+                    <div class="doctor-details">
+                      <h3>{{ doctor.name }}</h3>
+                      <p class="doctor-specialty">{{ doctor.specialty }}</p>
+                      <div class="doctor-meta">
+                        <span class="experience">
+                          <mat-icon>work_history</mat-icon>
+                          <span class="meta-text">{{ doctor.experience }} лет</span>
+                        </span>
+                        <span class="rating">
+                          <mat-icon>star</mat-icon>
+                          <span class="meta-text">{{ doctor.rating }}</span>
+                        </span>
+                        <span class="category">{{ getRandomCategory(doctor.id) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="doctor-price">
+                    <span class="price-label">Приём от</span>
+                    <span class="price-value">{{ doctor.price }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="filteredDoctors().length === 0" class="empty-state">
+                <mat-icon>search_off</mat-icon>
+                <p>Врачи не найдены</p>
+                <span>Попробуйте изменить параметры поиска</span>
+              </div>
+            </form>
+          </div>
+
+          <div class="card-actions">
+            <button mat-flat-button color="primary"
+                    [disabled]="!selectForm.valid"
+                    (click)="nextStep()">
+              Продолжить
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: Date & Time -->
+        <div class="booking-card fade-in" *ngIf="currentStep() === 1">
+          <div class="card-header">
+            <h2>Выберите дату и время</h2>
+            <p>{{ selectedDoctor()?.name }} • {{ selectedDoctor()?.specialty }}</p>
+          </div>
+
+          <div class="card-content">
+            <form [formGroup]="dateForm">
+              <div class="datetime-grid">
+                <!-- Calendar -->
+                <div class="calendar-section">
+                  <h3>Выберите дату</h3>
+                  <mat-form-field appearance="outline" class="date-field">
+                    <mat-label>Дата приёма</mat-label>
+                    <input matInput 
+                           [matDatepicker]="picker" 
+                           [min]="minDate"
+                           [max]="maxDate"
+                           formControlName="date"
+                           (dateChange)="onDateChange($event.value)"
+                           readonly>
+                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                    <mat-hint>Доступны даты в течение 2 месяцев</mat-hint>
+                  </mat-form-field>
+                </div>
+
+                <!-- Time Slots -->
+                <div class="time-section">
+                  <h3>Доступное время</h3>
+
+                  <div *ngIf="loadingSlots()" class="loading-state">
+                    <mat-spinner diameter="32"></mat-spinner>
+                    <p>Загружаем расписание...</p>
+                  </div>
+
+                  <div *ngIf="!loadingSlots() && !dateForm.value.date" class="empty-time-state">
+                    <mat-icon>schedule</mat-icon>
+                    <p>Сначала выберите дату</p>
+                  </div>
+
+                  <div *ngIf="!loadingSlots() && dateForm.value.date && timeSlots().length === 0" 
+                       class="empty-time-state">
+                    <mat-icon>event_busy</mat-icon>
+                    <p>На выбранную дату нет свободных слотов</p>
+                    <span>Попробуйте выбрать другой день</span>
+                  </div>
+
+                  <div class="time-slots-grid"
+                       *ngIf="!loadingSlots() && timeSlots().length > 0">
+                    <button *ngFor="let slot of timeSlots()"
+                            type="button"
+                            class="time-slot"
+                            [disabled]="!slot.available"
+                            [class.selected]="isTimeSelected(slot.time)"
+                            (click)="selectTime(slot.time)">
+                      {{ slot.time }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="card-actions">
+            <button mat-stroked-button (click)="prevStep()">
+              <mat-icon>arrow_back</mat-icon>
+              Назад
+            </button>
+            <button mat-flat-button color="primary"
+                    [disabled]="!dateForm.valid"
+                    (click)="nextStep()">
+              Продолжить
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3: Patient Data -->
+        <div class="booking-card fade-in" *ngIf="currentStep() === 2">
+          <div class="card-header">
+            <h2>Данные пациента</h2>
+            <p>Заполните контактную информацию</p>
+          </div>
+
+          <div class="card-content">
+            <form [formGroup]="patientForm">
+              <div class="form-grid">
+                <mat-form-field appearance="outline">
+                  <mat-label>Имя</mat-label>
+                  <mat-icon matPrefix>person</mat-icon>
+                  <input matInput formControlName="firstName">
+                  <mat-error *ngIf="patientForm.get('firstName')?.hasError('required')">
+                    Введите имя
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Фамилия</mat-label>
+                  <mat-icon matPrefix>badge</mat-icon>
+                  <input matInput formControlName="lastName">
+                  <mat-error *ngIf="patientForm.get('lastName')?.hasError('required')">
+                    Введите фамилию
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Телефон</mat-label>
+                  <mat-icon matPrefix>phone</mat-icon>
+                  <input matInput 
+                         formControlName="phone" 
+                         placeholder="+7 7__ ___-__-__"
+                         (input)="formatPhone($event)"
+                         (paste)="onPhonePaste($event)"
+                         maxlength="16"
+                         [disabled]="phoneVerified()">
+                  <mat-icon matSuffix *ngIf="phoneVerified()" class="verified-icon">verified</mat-icon>
+                  <mat-error *ngIf="patientForm.get('phone')?.hasError('required')">
+                    Введите номер телефона
+                  </mat-error>
+                  <mat-error *ngIf="patientForm.get('phone')?.hasError('phone')">
+                    Неверный формат номера
+                  </mat-error>
+                  <mat-hint>Казахстанский формат: +7 7XX XXX-XX-XX</mat-hint>
+                </mat-form-field>
+
+                <!-- WhatsApp Verification Section -->
+                <div class="whatsapp-verification full-width" 
+                     *ngIf="patientForm.get('phone')?.valid && !phoneVerified()">
+                  <div class="verification-card">
+                    <div class="verification-header">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" 
+                           alt="WhatsApp" 
+                           class="whatsapp-logo">
+                      <h4>Подтверждение номера телефона</h4>
+                    </div>
+                    
+                    <div *ngIf="!codeSent()" class="send-code-section">
+                      <p>Мы отправим код подтверждения на ваш WhatsApp</p>
+                      <button mat-flat-button color="primary" 
+                              (click)="sendWhatsAppCode()"
+                              type="button">
+                        <mat-icon>send</mat-icon>
+                        Отправить код на WhatsApp
+                      </button>
+                    </div>
+
+                    <div *ngIf="codeSent()" class="verify-code-section">
+                      <p>Код отправлен на номер {{ patientForm.value.phone }}</p>
+                      <p class="test-hint">Для тестирования используйте код: <strong>123456</strong></p>
+                      
+                      <form [formGroup]="verificationForm" class="code-form">
+                        <mat-form-field appearance="outline">
+                          <mat-label>Введите код из WhatsApp</mat-label>
+                          <mat-icon matPrefix>pin</mat-icon>
+                          <input matInput 
+                                 formControlName="code" 
+                                 placeholder="123456"
+                                 maxlength="6"
+                                 type="text"
+                                 pattern="[0-9]*">
+                          <mat-error *ngIf="verificationForm.get('code')?.hasError('required')">
+                            Введите код
+                          </mat-error>
+                          <mat-error *ngIf="verificationForm.get('code')?.hasError('pattern')">
+                            Код должен содержать 6 цифр
+                          </mat-error>
+                          <mat-error *ngIf="verificationForm.get('code')?.hasError('incorrect')">
+                            Неверный код. Попробуйте еще раз
+                          </mat-error>
+                        </mat-form-field>
+
+                        <div class="code-actions">
+                          <button mat-flat-button color="primary"
+                                  (click)="verifyCode()"
+                                  [disabled]="!verificationForm.valid || verifying()"
+                                  type="button">
+                            <mat-spinner *ngIf="verifying()" diameter="20"></mat-spinner>
+                            <span *ngIf="!verifying()">Подтвердить</span>
+                          </button>
+
+                          <button mat-stroked-button
+                                  (click)="resendCode()"
+                                  [disabled]="!canResend()"
+                                  type="button">
+                            <mat-icon>refresh</mat-icon>
+                            <span *ngIf="!canResend()">
+                              Отправить снова ({{ countdown() }}с)
+                            </span>
+                            <span *ngIf="canResend()">
+                              Отправить снова
+                            </span>
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Success Message -->
+                <div class="verification-success full-width" *ngIf="phoneVerified()">
+                  <mat-icon>check_circle</mat-icon>
+                  <p>Номер телефона подтвержден через WhatsApp</p>
+                </div>
+
+                <div class="gender-section">
+                  <label class="gender-label">Пол</label>
+                  <mat-radio-group formControlName="gender" class="gender-group">
+                    <mat-radio-button value="male">
+                      <mat-icon>male</mat-icon>
+                      Мужской
+                    </mat-radio-button>
+                    <mat-radio-button value="female">
+                      <mat-icon>female</mat-icon>
+                      Женский
+                    </mat-radio-button>
+                  </mat-radio-group>
+                </div>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Комментарий к записи</mat-label>
+                  <mat-icon matPrefix>edit_note</mat-icon>
+                  <textarea matInput 
+                            formControlName="comment" 
+                            rows="3"
+                            placeholder="Опишите причину обращения (необязательно)"></textarea>
+                </mat-form-field>
+              </div>
+            </form>
+          </div>
+
+          <div class="card-actions">
+            <button mat-stroked-button (click)="prevStep()">
+              <mat-icon>arrow_back</mat-icon>
+              Назад
+            </button>
+            <button mat-flat-button color="primary"
+                    [disabled]="!patientForm.valid || !phoneVerified()"
+                    (click)="nextStep()">
+              Продолжить
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 4: Confirmation -->
+        <div class="booking-card fade-in" *ngIf="currentStep() === 3">
+          <div class="card-header">
+            <h2>Подтверждение записи</h2>
+            <p>Проверьте введённые данные</p>
+          </div>
+
+          <div class="card-content">
+            <!-- Summary Box -->
+            <div class="summary-box">
+              <h3>Детали записи</h3>
+              
+              <div class="summary-grid">
+                <div class="summary-item">
+                  <p class="label">Специалист</p>
+                  <p class="value">{{ selectedDoctor()?.name }}</p>
+                  <p class="sub-value">{{ selectedDoctor()?.specialty }}</p>
+                </div>
+                
+                <div class="summary-item">
+                  <p class="label">Дата и время</p>
+                  <p class="value">{{ dateForm.value.date | date:'d MMMM yyyy':'':'ru' }}</p>
+                  <p class="sub-value">{{ dateForm.value.time }}</p>
+                </div>
+                
+                <div class="summary-item">
+                  <p class="label">Пациент</p>
+                  <p class="value">{{ patientForm.value.firstName }} {{ patientForm.value.lastName }}</p>
+                  <p class="sub-value">{{ patientForm.value.phone }}</p>
+                </div>
+                
+                <div class="summary-item">
+                  <p class="label">Стоимость приёма</p>
+                  <p class="value price">от {{ selectedDoctor()?.price }}</p>
+                </div>
+              </div>
+            </div>
+
+            <form [formGroup]="confirmForm" class="consent-form">
+              <mat-checkbox formControlName="consent">
+                <span class="consent-text">
+                  Я согласен с 
+                  <a href="/terms" target="_blank">условиями предоставления услуг</a> и 
+                  <a href="/privacy" target="_blank">политикой конфиденциальности</a>
+                </span>
+              </mat-checkbox>
+            </form>
+          </div>
+
+          <div class="card-actions">
+            <button mat-stroked-button 
+                    (click)="prevStep()"
+                    [disabled]="submitting()">
+              <mat-icon>arrow_back</mat-icon>
+              Назад
+            </button>
+            <button mat-flat-button color="primary"
+                    [disabled]="!confirmForm.valid || submitting()"
+                    (click)="placeBooking()"
+                    class="confirm-button">
+              <mat-spinner *ngIf="submitting()" diameter="20"></mat-spinner>
+              <span *ngIf="!submitting()">
+                Подтвердить запись
+                <mat-icon>check</mat-icon>
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Success Screen -->
+        <div class="booking-card success-screen fade-in" *ngIf="currentStep() === 4 && success()">
+          <div class="success-icon">
+            <mat-icon>check</mat-icon>
+          </div>
+          
+          <h2>Запись успешно создана!</h2>
+          <p>
+            Мы отправили подтверждение на ваш WhatsApp. 
+            Ждём вас {{ dateForm.value.date | date:'d MMMM':'':'ru' }} в {{ dateForm.value.time }}.
+          </p>
+          
+          <div class="success-details">
+            <div class="detail-item">
+              <mat-icon>person</mat-icon>
+              <span>{{ selectedDoctor()?.name }}</span>
+            </div>
+            <div class="detail-item">
+              <mat-icon>calendar_today</mat-icon>
+              <span>{{ dateForm.value.date | date:'fullDate':'':'ru' }}</span>
+            </div>
+            <div class="detail-item">
+              <mat-icon>schedule</mat-icon>
+              <span>{{ dateForm.value.time }}</span>
+            </div>
+          </div>
+          
+          <div class="success-actions">
+            <button mat-flat-button color="primary" routerLink="/">
+              <mat-icon>home</mat-icon>
+              На главную
+            </button>
+            <button mat-stroked-button (click)="resetBooking()">
+              <mat-icon>add</mat-icon>
+              Записаться ещё
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>

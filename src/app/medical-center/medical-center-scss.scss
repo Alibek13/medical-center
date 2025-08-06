@@ -1,0 +1,11 @@
+app-medical-center {
+    // Host styles
+    display: flex;
+    flex: 1 1 auto;
+    width: 100%;
+    
+    // Router outlet should take full space
+    router-outlet {
+        position: absolute;
+    }
+}

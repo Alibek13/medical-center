@@ -1,0 +1,198 @@
+<!-- landing.component.html -->
+<div class="medcenter-landing">
+    <!-- Header -->
+    <header [class.scrolled]="isScrolled">
+        <nav class="nav-container">
+            <a routerLink="/" class="logo">
+                <mat-icon>local_hospital</mat-icon>
+                Ainur
+            </a>
+
+            <!-- Desktop Menu -->
+            <div class="nav-links" *ngIf="!isMobile">
+                <a (click)="scrollToSection('features')">Преимущества</a>
+                <a (click)="scrollToSection('doctors')">Врачи</a>
+                <a (click)="scrollToSection('about')">О нас</a>
+                <a (click)="scrollToSection('contacts')">Контакты</a>
+                <a routerLink="/booking" class="cta-button">Записаться</a>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-btn" *ngIf="isMobile" (click)="toggleMobileMenu()">
+                <mat-icon>{{mobileMenuOpen ? 'close' : 'menu'}}</mat-icon>
+            </button>
+        </nav>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" *ngIf="isMobile && mobileMenuOpen" [@slideDown]>
+            <a (click)="scrollToSection('features'); toggleMobileMenu()">Преимущества</a>
+            <a (click)="scrollToSection('doctors'); toggleMobileMenu()">Врачи</a>
+            <a (click)="scrollToSection('about'); toggleMobileMenu()">О нас</a>
+            <a (click)="scrollToSection('contacts'); toggleMobileMenu()">Контакты</a>
+            <a routerLink="/booking" class="cta-button">Записаться</a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text" [@fadeInUp]>
+                <h1>Врачи, <span> которым доверяют</span> тысячи семей</h1>
+                <p>Современные технологии диагностики, опытные специалисты и индивидуальный подход к каждому пациенту
+                </p>
+                <div class="hero-buttons">
+                    <button mat-raised-button class="btn-primary" routerLink="/booking">
+                        Записаться на приём
+                        <mat-icon>arrow_forward</mat-icon>
+                    </button>
+                    <button mat-stroked-button class="btn-secondary" (click)="scrollToSection('doctors')">
+                        Наши врачи
+                    </button>
+                </div>
+            </div>
+            <div class="hero-image" *ngIf="!isMobile">
+                <div class="hero-visual">
+                    <!-- Изображение врача -->
+                    <img src="images/doctor-hero.png" alt="Наш врач" class="doctor-image" loading="lazy">
+
+                    <!-- Floating cards позиционируем вокруг изображения -->
+                    <div class="floating-card floating-card-1" [@float]>
+                        <strong>24/7</strong><br>
+                        Онлайн-запись
+                    </div>
+                    <div class="floating-card floating-card-2" [@float]>
+                        <strong>Лучшие</strong><br>
+                        Специалисты
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header" [@fadeIn]>
+                <h2>Почему выбирают нас</h2>
+                <p>Мы создаем комфортные условия для заботы о вашем здоровье</p>
+            </div>
+            <div class="features-grid">
+                <mat-card *ngFor="let feature of features; let i = index" class="feature-card"
+                    [@fadeInUp]="{value: '', params: {delay: i * 100}}">
+                    <div class="feature-icon">
+                        <mat-icon>{{feature.icon}}</mat-icon>
+                    </div>
+                    <h3>{{feature.title}}</h3>
+                    <p>{{feature.desc}}</p>
+                </mat-card>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div *ngFor="let stat of stats" class="stat-item" [@counter]>
+                    <h3>{{stat.value}}</h3>
+                    <p>{{stat.label}}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Doctors Section -->
+    <section id="doctors" class="doctors">
+        <div class="container">
+            <div class="section-header" [@fadeIn]>
+                <h2>Наши специалисты</h2>
+                <p>Команда профессионалов, которой доверяют</p>
+            </div>
+            <div class="doctors-grid">
+                <mat-card *ngFor="let doctor of doctors" class="doctor-card" [@fadeInUp]>
+                    <div class="doctor-image">
+                        <mat-icon>person</mat-icon>
+                    </div>
+                    <mat-card-content>
+                        <h3>{{doctor.name}}</h3>
+                        <p class="doctor-specialty">{{doctor.specialty}}</p>
+                        <div class="doctor-experience">
+                            <mat-icon>work_history</mat-icon>
+                            Стаж работы: {{doctor.experience}} лет
+                        </div>
+                        <button mat-raised-button class="btn-book"
+                            [routerLink]="['/medical-center/appointments/booking', doctor.id]">
+                            Записаться на приём
+                        </button>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+            <div class="doctors-more">
+                <button mat-stroked-button routerLink="/medical-center/doctors">
+                    Все специалисты
+                    <mat-icon>arrow_forward</mat-icon>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content" [@fadeIn]>
+                <h2>Запишитесь на консультацию сегодня</h2>
+                <p>Получите профессиональную медицинскую помощь в удобное для вас время</p>
+                <button mat-raised-button class="cta-btn" routerLink="/medical-center/appointments/booking">
+                    Выбрать время приёма
+                    <mat-icon>arrow_forward</mat-icon>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contacts">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h4>MedCenter</h4>
+                <p>Современный медицинский центр с персональным подходом к каждому пациенту</p>
+            </div>
+            <div class="footer-section">
+                <h4>Услуги</h4>
+                <ul>
+                    <li><a routerLink="/services/diagnostics">Диагностика</a></li>
+                    <li><a routerLink="/services/consultations">Консультации</a></li>
+                    <li><a routerLink="/services/analyses">Анализы</a></li>
+                    <li><a routerLink="/services/checkup">Check-up</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Клиника</h4>
+                <ul>
+                    <li><a routerLink="/about">О нас</a></li>
+                    <li><a routerLink="/medical-center/doctors">Врачи</a></li>
+                    <li><a routerLink="/technologies">Технологии</a></li>
+                    <li><a routerLink="/reviews">Отзывы</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Контакты</h4>
+                <p class="contact-info">
+                    <mat-icon>location_on</mat-icon>
+                    г. Алматы, пр. Абая 10
+                </p>
+                <p class="contact-info">
+                    <mat-icon>phone</mat-icon>
+                    +7 (777) 123-45-67
+                </p>
+                <p class="contact-info">
+                    <mat-icon>email</mat-icon>
+                    medcenter.kz
+                </p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© {{ currentYear }} MedCenter. Все права защищены.</p>
+        </div>
+    </footer>
+</div>

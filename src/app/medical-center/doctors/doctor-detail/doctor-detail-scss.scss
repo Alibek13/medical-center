@@ -1,0 +1,63 @@
+app-doctor-detail {
+    // Profile header
+    .profile-header {
+        position: relative;
+        
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.1));
+        }
+    }
+    
+    // Avatar positioning
+    .avatar-container {
+        margin-top: -4rem;
+        position: relative;
+        z-index: 10;
+    }
+    
+    // Time slots
+    .time-slot {
+        @apply transition-all duration-200;
+        
+        &.occupied {
+            @apply bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400;
+        }
+        
+        &.available {
+            @apply bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400;
+            @apply cursor-pointer hover:bg-green-200 dark:hover:bg-green-900/30;
+            
+            &:hover {
+                @apply transform scale-105;
+            }
+        }
+    }
+    
+    // Review cards
+    .review-card {
+        @apply transition-all duration-300;
+        
+        &:hover {
+            // @apply transform translateX(4px);
+        }
+    }
+    
+    // Stat cards animation
+    .stat-card {
+        @apply transition-all duration-300;
+        
+        &:hover {
+            @apply transform scale-105;
+            
+            .stat-value {
+                @apply text-primary;
+            }
+        }
+    }
+}

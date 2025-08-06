@@ -1,0 +1,290 @@
+<div class="flex flex-col flex-auto min-w-0">
+    
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:py-8 sm:px-10 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <div class="flex items-center mb-2">
+                <button mat-icon-button
+                        [routerLink]="['/medical-center/doctors']"
+                        class="mr-2">
+                    <mat-icon [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+                </button>
+                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                    Запись на прием
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex-auto p-6 sm:p-10">
+        
+        <!-- Doctor Info -->
+        <fuse-card class="mb-8" *ngIf="doctor">
+            <div class="p-6">
+                <div class="flex items-center">
+                    <img [src]="doctor.avatar" 
+                         [alt]="doctor.name"
+                         class="w-20 h-20 rounded-full mr-6">
+                    <div class="flex-1">
+                        <h3 class="text-2xl font-semibold">{{ doctor.name }}</h3>
+                        <p class="text-lg text-primary font-medium">{{ doctor.specialty }}</p>
+                        <p class="text-secondary">{{ doctor.experience }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-2xl font-bold text-primary">{{ doctor.price }}</p>
+                        <p class="text-sm text-secondary">за прием</p>
+                    </div>
+                </div>
+            </div>
+        </fuse-card>
+
+        <!-- Stepper -->
+        <mat-stepper #stepper linear class="shadow-lg rounded-2xl overflow-hidden">
+            
+            <!-- Step 1: Date and Time -->
+            <mat-step [stepControl]="dateForm">
+                <ng-template matStepLabel>Выберите дату и время</ng-template>
+                
+                <div class="p-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        
+                        <!-- Date Picker -->
+                        <div>
+                            <h4 class="text-lg font-medium mb-4">Выберите дату</h4>
+<mat-form-field class="w-full" appearance="fill">
+    <mat-label>Дата приема</mat-label>
+    <input matInput 
+           [matDatepicker]="picker" 
+           [formControl]="dateForm.get('date')"
+           (dateChange)="onDateChange($event.value)">
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+</mat-form-field>
+                            
+                            <fuse-alert class="mt-4" [appearance]="'outline'" [type]="'info'">
+                                <span fuseAlertTitle>Информация</span>
+                                Прием осуществляется только в будние дни
+                            </fuse-alert>
+                        </div>
+                        
+                        <!-- Time Slots -->
+                        <div>
+                            <h4 class="text-lg font-medium mb-4">Выберите время</h4>
+                            
+                            <div *ngIf="!selectedDate" class="text-secondary">
+                                Сначала выберите дату
+                            </div>
+                            
+                            <div *ngIf="isLoading" class="flex items-center justify-center py-8">
+                                <mat-spinner [diameter]="40"></mat-spinner>
+                            </div>
+                            
+                            <div *ngIf="selectedDate && !isLoading && timeSlots.length > 0" 
+                                 class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                                <button *ngFor="let slot of timeSlots"
+                                        type="button"
+                                        [disabled]="!slot.available"
+                                        [ngClass]="getTimeSlotClass(slot)"
+                                        (click)="onTimeSelect(slot.time)"
+                                        class="py-2 px-3 rounded-lg border text-sm font-medium transition-all">
+                                    {{ slot.time }}
+                                </button>
+                            </div>
+                            
+                            <div *ngIf="selectedDate && !isLoading && timeSlots.length === 0" 
+                                 class="text-secondary">
+                                На выбранную дату нет свободных слотов
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end mt-8">
+                        <button mat-flat-button
+                                [color]="'primary'"
+                                [disabled]="!dateForm.valid"
+                                matStepperNext>
+                            Далее
+                            <mat-icon class="ml-2 icon-size-5" [svgIcon]="'heroicons_outline:arrow-right'"></mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </mat-step>
+
+            <!-- Step 2: Patient Information -->
+            <mat-step [stepControl]="patientForm">
+                <ng-template matStepLabel>Данные пациента</ng-template>
+                
+                <div class="p-6">
+                    <form [formGroup]="patientForm">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            
+                            <mat-form-field appearance="fill">
+                                <mat-label>Имя</mat-label>
+                                <input matInput formControlName="firstName">
+                                <mat-error>Это поле обязательно</mat-error>
+                            </mat-form-field>
+                            
+                            <mat-form-field appearance="fill">
+                                <mat-label>Фамилия</mat-label>
+                                <input matInput formControlName="lastName">
+                                <mat-error>Это поле обязательно</mat-error>
+                            </mat-form-field>
+                            
+                            <mat-form-field appearance="fill">
+                                <mat-label>Телефон</mat-label>
+                                <input matInput formControlName="phone" placeholder="+7 (___) ___-__-__">
+                                <mat-icon matPrefix [svgIcon]="'heroicons_outline:phone'"></mat-icon>
+                                <mat-error>Введите корректный номер телефона</mat-error>
+                            </mat-form-field>
+                            
+                            <mat-form-field appearance="fill">
+                                <mat-label>Email</mat-label>
+                                <input matInput formControlName="email" type="email">
+                                <mat-icon matPrefix [svgIcon]="'heroicons_outline:mail'"></mat-icon>
+                                <mat-error>Введите корректный email</mat-error>
+                            </mat-form-field>
+                            
+                            <mat-form-field appearance="fill">
+                                <mat-label>Дата рождения</mat-label>
+                                <input matInput [matDatepicker]="birthPicker" formControlName="birthDate">
+                                <mat-datepicker-toggle matSuffix [for]="birthPicker"></mat-datepicker-toggle>
+                                <mat-datepicker #birthPicker></mat-datepicker>
+                                <mat-error>Это поле обязательно</mat-error>
+                            </mat-form-field>
+                            
+                            <div class="flex flex-col">
+                                <label class="text-sm font-medium text-secondary mb-2">Пол</label>
+                                <mat-radio-group formControlName="gender" class="flex space-x-4">
+                                    <mat-radio-button value="male">Мужской</mat-radio-button>
+                                    <mat-radio-button value="female">Женский</mat-radio-button>
+                                </mat-radio-group>
+                            </div>
+                            
+                            <mat-form-field appearance="fill" class="sm:col-span-2">
+                                <mat-label>Комментарий (необязательно)</mat-label>
+                                <textarea matInput 
+                                          formControlName="comment"
+                                          rows="3"
+                                          placeholder="Опишите причину обращения или особые пожелания"></textarea>
+                            </mat-form-field>
+                        </div>
+                    </form>
+                    
+                    <div class="flex justify-between mt-8">
+                        <button mat-stroked-button matStepperPrevious>
+                            <mat-icon class="mr-2 icon-size-5" [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+                            Назад
+                        </button>
+                        <button mat-flat-button
+                                [color]="'primary'"
+                                [disabled]="!patientForm.valid"
+                                matStepperNext>
+                            Далее
+                            <mat-icon class="ml-2 icon-size-5" [svgIcon]="'heroicons_outline:arrow-right'"></mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </mat-step>
+
+            <!-- Step 3: Confirmation -->
+            <mat-step [stepControl]="confirmForm">
+                <ng-template matStepLabel>Подтверждение</ng-template>
+                
+                <div class="p-6">
+                    <h4 class="text-lg font-medium mb-4">Проверьте введенные данные</h4>
+                    
+                    <fuse-card class="mb-6">
+                        <div class="p-6 space-y-4">
+                            <div class="flex justify-between">
+                                <span class="text-secondary">Врач:</span>
+                                <span class="font-medium">{{ doctor?.name }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-secondary">Специальность:</span>
+                                <span class="font-medium">{{ doctor?.specialty }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-secondary">Дата:</span>
+                                <span class="font-medium">{{ formatDate(selectedDate) }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-secondary">Время:</span>
+                                <span class="font-medium">{{ selectedTime }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-secondary">Стоимость:</span>
+                                <span class="font-medium text-primary">{{ doctor?.price }}</span>
+                            </div>
+                        </div>
+                    </fuse-card>
+                    
+                    <fuse-card class="mb-6">
+                        <div class="p-6 space-y-4">
+                            <h5 class="font-medium">Данные пациента</h5>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <span class="text-secondary">Имя:</span>
+                                    <span class="ml-2">{{ patientForm.get('firstName').value }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-secondary">Фамилия:</span>
+                                    <span class="ml-2">{{ patientForm.get('lastName').value }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-secondary">Телефон:</span>
+                                    <span class="ml-2">{{ patientForm.get('phone').value }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-secondary">Email:</span>
+                                    <span class="ml-2">{{ patientForm.get('email').value }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </fuse-card>
+                    
+                    <form [formGroup]="confirmForm">
+                        <mat-checkbox formControlName="consent" class="mb-6">
+                            Я согласен на обработку персональных данных и с 
+                            <a href="#" class="text-primary hover:underline">условиями предоставления услуг</a>
+                        </mat-checkbox>
+                    </form>
+                    
+                    <fuse-alert [appearance]="'outline'" [type]="'info'" class="mb-6">
+                        <span fuseAlertTitle>Напоминание</span>
+                        За сутки до приема вы получите SMS-напоминание на указанный номер телефона
+                    </fuse-alert>
+                    
+                    <div class="flex justify-between">
+                        <button mat-stroked-button matStepperPrevious>
+                            <mat-icon class="mr-2 icon-size-5" [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+                            Назад
+                        </button>
+                        <button mat-flat-button
+                                [color]="'primary'"
+                                [disabled]="!confirmForm.valid || isLoading"
+                                (click)="submitBooking()">
+                            <mat-icon *ngIf="!isLoading" class="mr-2 icon-size-5" [svgIcon]="'heroicons_outline:check'"></mat-icon>
+                            <mat-spinner *ngIf="isLoading" [diameter]="20" class="mr-2"></mat-spinner>
+                            {{ isLoading ? 'Обработка...' : 'Подтвердить запись' }}
+                        </button>
+                    </div>
+                </div>
+            </mat-step>
+        </mat-stepper>
+    </div>
+</div>
+
+<style>
+    .time-slot-available {
+        @apply border-gray-300 hover:border-primary hover:bg-primary-50 cursor-pointer;
+    }
+    
+    .time-slot-selected {
+        @apply bg-primary text-white border-primary;
+    }
+    
+    .time-slot-disabled {
+        @apply bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed;
+    }
+</style>

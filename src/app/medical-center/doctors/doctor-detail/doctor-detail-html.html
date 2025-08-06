@@ -1,0 +1,231 @@
+<div class="flex flex-col flex-auto min-w-0" *ngIf="doctor">
+
+    <!-- Header -->
+    <div class="relative w-full h-40 sm:h-48 px-8 sm:px-12 bg-primary-600 dark:bg-primary">
+        <div class="flex items-center justify-between h-full">
+            <div class="flex items-center">
+                <button mat-icon-button [routerLink]="['/medical-center/doctors']" class="text-white mr-4">
+                    <mat-icon [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+                </button>
+                <div>
+                    <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+                        {{ doctor.name }}
+                    </h2>
+                    <p class="text-primary-100 text-lg">{{ doctor.specialty }}</p>
+                </div>
+            </div>
+            <button mat-flat-button class="bg-white text-primary"
+                [routerLink]="['/medical-center/appointments/booking', doctor.id]">
+                <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+                Записать пациента
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-auto">
+
+        <!-- Profile Section -->
+        <div class="relative flex flex-col sm:flex-row flex-0 sm:items-center p-6 sm:p-12 pb-0 sm:pb-0">
+            <div class="relative flex-0 mb-5 sm:mb-0">
+                <img [src]="doctor.avatar" [alt]="doctor.name"
+                    class="w-32 h-32 rounded-full border-4 border-white shadow-xl" style="margin-top: -4rem;">
+            </div>
+
+            <div class="flex-auto sm:ml-8">
+                <div class="flex flex-wrap items-center mb-2">
+                    <mat-chip
+                        [ngClass]="doctor.status === 'available' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'">
+                        {{ doctor.status === 'available' ? 'Доступен' : 'Не доступен' }}
+                    </mat-chip>
+                    <span class="mx-3 text-gray-300">•</span>
+                    <div class="flex items-center">
+                        <mat-icon class="icon-size-5 text-amber-500 mr-1" [svgIcon]="'heroicons_solid:star'"></mat-icon>
+                        <span class="font-medium">{{ doctor.rating }}</span>
+                        <span class="ml-1 text-secondary">({{ doctor.reviews }} отзывов)</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-6 text-sm">
+                    <div class="flex items-center">
+                        <mat-icon class="icon-size-4 mr-1 text-secondary"
+                            [svgIcon]="'heroicons_outline:briefcase'"></mat-icon>
+                        {{ doctor.experience }}
+                    </div>
+                    <div class="flex items-center">
+                        <mat-icon class="icon-size-4 mr-1 text-secondary"
+                            [svgIcon]="'heroicons_outline:mail'"></mat-icon>
+                        {{ doctor.email }}
+                    </div>
+                    <div class="flex items-center">
+                        <mat-icon class="icon-size-4 mr-1 text-secondary"
+                            [svgIcon]="'heroicons_outline:phone'"></mat-icon>
+                        {{ doctor.phone }}
+                    </div>
+                    <div class="flex items-center font-semibold text-primary">
+                        <mat-icon class="icon-size-4 mr-1" [svgIcon]="'heroicons_outline:currency-dollar'"></mat-icon>
+                        {{ doctor.price }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="p-6 sm:p-12">
+            <mat-tab-group class="w-full">
+
+                <!-- About Tab -->
+                <mat-tab label="О враче">
+                    <div class="pt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                        <!-- Bio -->
+                        <fuse-card class="p-6">
+                            <h3 class="text-lg font-semibold mb-4">Биография</h3>
+                            <p class="text-secondary leading-relaxed">
+                                {{ doctor.bio || 'Информация о враче будет добавлена позже.' }}
+                            </p>
+                        </fuse-card>
+
+                        <!-- Education -->
+                        <fuse-card class="p-6">
+                            <h3 class="text-lg font-semibold mb-4">Образование</h3>
+                            <div class="space-y-3" *ngIf="doctor.education">
+                                <div *ngFor="let edu of doctor.education" class="flex items-start">
+                                    <mat-icon class="icon-size-5 mr-3 text-primary"
+                                        [svgIcon]="'heroicons_solid:academic-cap'"></mat-icon>
+                                    <span class="text-secondary">{{ edu }}</span>
+                                </div>
+                            </div>
+                            <p *ngIf="!doctor.education" class="text-secondary">
+                                Информация об образовании будет добавлена позже.
+                            </p>
+                        </fuse-card>
+
+                        <!-- Languages -->
+                        <fuse-card class="p-6">
+                            <h3 class="text-lg font-semibold mb-4">Языки</h3>
+                            <div class="flex flex-wrap gap-2" *ngIf="doctor.languages">
+                                <mat-chip *ngFor="let lang of doctor.languages">
+                                    {{ lang }}
+                                </mat-chip>
+                            </div>
+                            <p *ngIf="!doctor.languages" class="text-secondary">
+                                Информация о языках будет добавлена позже.
+                            </p>
+                        </fuse-card>
+
+                        <!-- Working Hours -->
+                        <fuse-card class="p-6">
+                            <h3 class="text-lg font-semibold mb-4">График работы</h3>
+                            <div class="space-y-2" *ngIf="doctor.workingHours">
+                                <div class="flex justify-between">
+                                    <span class="text-secondary">Понедельник</span>
+                                    <span class="font-medium">{{ doctor.workingHours.monday.start }} - {{
+                                        doctor.workingHours.monday.end }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-secondary">Вторник</span>
+                                    <span class="font-medium">{{ doctor.workingHours.tuesday.start }} - {{
+                                        doctor.workingHours.tuesday.end }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-secondary">Среда</span>
+                                    <span class="font-medium">{{ doctor.workingHours.wednesday.start }} - {{
+                                        doctor.workingHours.wednesday.end }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-secondary">Четверг</span>
+                                    <span class="font-medium">{{ doctor.workingHours.thursday.start }} - {{
+                                        doctor.workingHours.thursday.end }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-secondary">Пятница</span>
+                                    <span class="font-medium">{{ doctor.workingHours.friday.start }} - {{
+                                        doctor.workingHours.friday.end }}</span>
+                                </div>
+                            </div>
+                            <p *ngIf="!doctor.workingHours" class="text-secondary">
+                                График работы будет добавлен позже.
+                            </p>
+                        </fuse-card>
+                    </div>
+                </mat-tab>
+
+                <!-- Schedule Tab -->
+                <mat-tab label="Расписание">
+                    <div class="pt-6">
+                        <fuse-card class="p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-lg font-semibold">Расписание на сегодня</h3>
+                                <button mat-stroked-button>
+                                    <mat-icon class="icon-size-5 mr-2"
+                                        [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+                                    Выбрать дату
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                <div *ngFor="let slot of schedule.monday"
+                                    class="p-3 rounded-lg text-center text-sm font-medium transition-all"
+                                    [ngClass]="getTimeSlotClass(slot)">
+                                    <div class="font-semibold">{{ slot.time }}</div>
+                                    <div *ngIf="slot.patient" class="text-xs mt-1">
+                                        {{ slot.patient }}
+                                    </div>
+                                    <div *ngIf="!slot.patient" class="text-xs mt-1">
+                                        Свободно
+                                    </div>
+                                </div>
+                            </div>
+                        </fuse-card>
+                    </div>
+                </mat-tab>
+
+                <!-- Reviews Tab -->
+                <mat-tab label="Отзывы">
+                    <div class="pt-6 space-y-4">
+                        <fuse-card *ngFor="let review of reviews" class="p-6">
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <h4 class="font-semibold">{{ review.patientName }}</h4>
+                                    <div class="flex items-center mt-1">
+                                        <mat-icon *ngFor="let star of [1,2,3,4,5]" class="icon-size-4 text-amber-500"
+                                            [svgIcon]="star <= review.rating ? 'heroicons_solid:star' : 'heroicons_outline:star'">
+                                        </mat-icon>
+                                    </div>
+                                </div>
+                                <span class="text-sm text-secondary">{{ review.date | date:'dd.MM.yyyy' }}</span>
+                            </div>
+                            <p class="text-secondary">{{ review.comment }}</p>
+                        </fuse-card>
+                    </div>
+                </mat-tab>
+
+                <!-- Statistics Tab -->
+                <mat-tab label="Статистика">
+                    <div class="pt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <fuse-card class="p-6 text-center">
+                            <div class="text-3xl font-bold text-primary">156</div>
+                            <div class="text-sm text-secondary mt-1">Пациентов в этом месяце</div>
+                        </fuse-card>
+
+                        <fuse-card class="p-6 text-center">
+                            <div class="text-3xl font-bold text-green-600">98%</div>
+                            <div class="text-sm text-secondary mt-1">Довольных пациентов</div>
+                        </fuse-card>
+
+                        <fuse-card class="p-6 text-center">
+                            <div class="text-3xl font-bold text-blue-600">4.9</div>
+                            <div class="text-sm text-secondary mt-1">Средний рейтинг</div>
+                        </fuse-card>
+
+                        <fuse-card class="p-6 text-center">
+                            <div class="text-3xl font-bold text-purple-600">12</div>
+                            <div class="text-sm text-secondary mt-1">Лет опыта</div>
+                        </fuse-card>
+                    </div>
+                </mat-tab>
+            </mat-tab-group>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,91 @@
+app-doctors {
+
+    /* Общая шапка всех внутренних экранов */
+    .page-header {
+        @apply border-b bg-card dark:bg-transparent p-6 sm:p-8 sm:pl-10 flex flex-col sm:flex-row sm:items-center sm:justify-between;
+
+        /* убрали не‑существующий класс flex-0 → flex-none */
+        @apply flex-none;
+    }
+
+    /* Название страницы */
+    .page-title {
+        @apply text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate;
+    }
+
+    /* Блок счётчика/иконки под заголовком */
+    .info {
+        @apply flex items-center mt-1;
+    }
+
+    /* Колонка действий (кнопки / переключатель вида) */
+    .actions {
+        @apply flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4;
+    }
+
+    /* Фиксация статусов врачей, переиспользуется в grid и list */
+    .status-available {
+        @apply bg-green-100 text-green-700;
+    }
+
+    .status-unavailable {
+        @apply bg-gray-100 text-gray-700;
+    }
+
+    /* Исправленные классы time‑slot (оставил здесь, если нужны) */
+    .time-slot-available {
+        @apply border-gray-300 hover:border-primary hover:bg-primary-50 cursor-pointer;
+    }
+
+    .time-slot-selected {
+        @apply bg-primary text-white border-primary;
+    }
+
+    .time-slot-disabled {
+        @apply bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed;
+    }
+
+    // Grid view animations
+    .doctor-card {
+        @apply transition-all duration-300 ease-in-out;
+
+        &:hover {
+            @apply transform -translate-y-1;
+
+            img {
+                @apply transform scale-110;
+            }
+        }
+
+        img {
+            @apply transition-transform duration-300;
+        }
+    }
+
+    // Status chip colors
+    .mat-mdc-chip {
+        &.text-green-500 {
+            @apply bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300;
+        }
+
+        &.text-orange-500 {
+            @apply bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300;
+        }
+
+        &.text-gray-500 {
+            @apply bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300;
+        }
+    }
+
+    // Table hover effects
+    .mat-mdc-table {
+        .mat-mdc-row {
+            @apply transition-colors duration-200;
+        }
+    }
+
+    // Filter section
+    .filter-section {
+        @apply sticky top-0 z-10 bg-card;
+    }
+}
