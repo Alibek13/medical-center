@@ -1,0 +1,207 @@
+<!-- src/app/medical-center/doctors/doctor-form-dialog/doctor-form-dialog-html.html -->
+<h2 mat-dialog-title class="flex items-center gap-3">
+    <mat-icon class="text-primary"
+        [svgIcon]="mode === 'create' ? 'heroicons_outline:user-plus' : 'heroicons_outline:pencil'"></mat-icon>
+    <span>{{ mode === 'create' ? 'Добавить нового врача' : 'Редактировать данные врача' }}</span>
+</h2>
+
+<mat-dialog-content class="mat-dialog-content">
+    <form [formGroup]="doctorForm" class="mt-6">
+        <mat-tab-group animationDuration="200ms">
+
+            <!-- Основная информация -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <mat-icon class="mr-2" [svgIcon]="'heroicons_outline:user'"></mat-icon>
+                    Основная информация
+                </ng-template>
+
+                <div class="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <!-- ФИО -->
+                    <mat-form-field class="sm:col-span-2">
+                        <mat-label>ФИО</mat-label>
+                        <mat-icon matPrefix [svgIcon]="'heroicons_outline:identification'"></mat-icon>
+                        <input matInput formControlName="name" placeholder="Иванов Иван Иванович">
+                        <mat-error *ngIf="doctorForm.get('name')?.hasError('required')">
+                            ФИО обязательно для заполнения
+                        </mat-error>
+                        <mat-error *ngIf="doctorForm.get('name')?.hasError('minlength')">
+                            ФИО должно содержать минимум 3 символа
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Email -->
+                    <mat-form-field>
+                        <mat-label>Email</mat-label>
+                        <mat-icon matPrefix [svgIcon]="'heroicons_outline:envelope'"></mat-icon>
+                        <input matInput formControlName="email" placeholder="doctor@medcenter.kz" type="email">
+                        <mat-error *ngIf="doctorForm.get('email')?.hasError('required')">
+                            Email обязателен
+                        </mat-error>
+                        <mat-error *ngIf="doctorForm.get('email')?.hasError('email')">
+                            Введите корректный email
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Телефон -->
+                    <mat-form-field>
+                        <mat-label>Телефон</mat-label>
+                        <mat-icon matPrefix [svgIcon]="'heroicons_outline:phone'"></mat-icon>
+                        <input matInput formControlName="phone" placeholder="+7 (777) 123-45-67" type="tel">
+                        <mat-error *ngIf="doctorForm.get('phone')?.hasError('required')">
+                            Телефон обязателен
+                        </mat-error>
+                        <mat-error *ngIf="doctorForm.get('phone')?.hasError('pattern')">
+                            Формат: +7 (XXX) XXX-XX-XX
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Специальность -->
+                    <mat-form-field>
+                        <mat-label>Специальность</mat-label>
+                        <mat-icon matPrefix [svgIcon]="'heroicons_outline:academic-cap'"></mat-icon>
+                        <mat-select formControlName="specialty">
+                            <mat-option *ngFor="let spec of specialties" [value]="spec">
+                                {{ spec }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="doctorForm.get('specialty')?.hasError('required')">
+                            Выберите специальность
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Опыт работы -->
+                    <mat-form-field>
+                        <mat-label>Опыт работы</mat-label>
+                        <mat-icon matPrefix [svgIcon]="'heroicons_outline:briefcase'"></mat-icon>
+                        <input matInput formControlName="experience" placeholder="15 лет">
+                        <mat-hint>Например: "15 лет" или "3 года"</mat-hint>
+                        <mat-error *ngIf="doctorForm.get('experience')?.hasError('required')">
+                            Укажите опыт работы
+                        </mat-error>
+                        <mat-error *ngIf="doctorForm.get('experience')?.hasError('pattern')">
+                            Укажите в формате: "5 лет" или "2 года"
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Стоимость приема -->
+                    <mat-form-field>
+                        <mat-label>Стоимость приема</mat-label>
+                        <mat-icon matPrefix [svgIcon]="'heroicons_outline:currency-dollar'"></mat-icon>
+                        <input matInput formControlName="price" placeholder="12 000 ₸" (blur)="formatPrice($event)">
+                        <mat-hint>Стоимость одного приема</mat-hint>
+                        <mat-error *ngIf="doctorForm.get('price')?.hasError('required')">
+                            Укажите стоимость
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Языки -->
+                    <mat-form-field class="sm:col-span-2">
+                        <mat-label>Языки</mat-label>
+                        <mat-icon matPrefix [svgIcon]="'heroicons_outline:language'"></mat-icon>
+                        <mat-select formControlName="languages" multiple>
+                            <mat-option *ngFor="let lang of languages" [value]="lang">
+                                {{ lang }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="doctorForm.get('languages')?.hasError('required')">
+                            Выберите хотя бы один язык
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Биография -->
+                    <mat-form-field class="sm:col-span-2">
+                        <mat-label>О враче</mat-label>
+                        <textarea matInput formControlName="bio" rows="4"
+                            placeholder="Краткая информация о враче, специализация, достижения..."></textarea>
+                        <mat-hint align="end">{{ doctorForm.get('bio')?.value?.length || 0 }}/500</mat-hint>
+                        <mat-error *ngIf="doctorForm.get('bio')?.hasError('maxLength')">
+                            Максимум 500 символов
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Рейтинг и отзывы -->
+                    <mat-form-field>
+                        <mat-label>Рейтинг</mat-label>
+                        <mat-icon matPrefix [svgIcon]="'heroicons_outline:star'"></mat-icon>
+                        <input matInput type="number" formControlName="rating" min="0" max="5" step="0.1">
+                        <mat-hint>От 0 до 5</mat-hint>
+                    </mat-form-field>
+
+                    <mat-form-field>
+                        <mat-label>Количество отзывов</mat-label>
+                        <mat-icon matPrefix [svgIcon]="'heroicons_outline:chat-bubble-left-right'"></mat-icon>
+                        <input matInput type="number" formControlName="reviews" min="0">
+                    </mat-form-field>
+                </div>
+            </mat-tab>
+
+            <!-- Образование -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <mat-icon class="mr-2" [svgIcon]="'heroicons_outline:academic-cap'"></mat-icon>
+                    Образование
+                </ng-template>
+
+                <div class="pt-6">
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 class="text-lg font-medium">Образование и квалификация</h3>
+                        <button mat-stroked-button type="button" (click)="addEducation()" color="primary">
+                            <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                            <span class="ml-2">Добавить</span>
+                        </button>
+                    </div>
+
+                    <div formArrayName="education" class="space-y-3">
+                        <div *ngFor="let edu of educationArray.controls; let i = index" class="flex items-start gap-3">
+                            <mat-icon class="mt-3.5 text-secondary"
+                                [svgIcon]="'heroicons_outline:academic-cap'"></mat-icon>
+                            <mat-form-field class="flex-1">
+                                <mat-label>Образование {{ i + 1 }}</mat-label>
+                                <input matInput [formControlName]="i"
+                                    placeholder="Например: КазНМУ им. С.Д. Асфендиярова, терапия (2010)">
+                                <mat-error *ngIf="educationArray.at(i).hasError('required')">
+                                    Заполните поле
+                                </mat-error>
+                                <mat-error *ngIf="educationArray.at(i).hasError('minlength')">
+                                    Минимум 5 символов
+                                </mat-error>
+                            </mat-form-field>
+                            <button mat-icon-button type="button" (click)="removeEducation(i)"
+                                [disabled]="educationArray.length === 1" class="mt-2">
+                                <mat-icon class="text-warn" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div *ngIf="educationArray.length === 0" class="text-center py-8 text-secondary">
+                        <mat-icon class="icon-size-12 mb-2">school</mat-icon>
+                        <p>Нажмите "Добавить" чтобы указать образование</p>
+                    </div>
+                </div>
+            </mat-tab>
+
+            <!-- График работы -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <mat-icon class="mr-2" [svgIcon]="'heroicons_outline:calendar-days'"></mat-icon>
+                    График работы
+                </ng-template>
+
+                <div class="pt-6">
+                    <doctor-schedule [scheduleConfig]="doctorSchedule" (scheduleChange)="updateSchedule($event)">
+                    </doctor-schedule>
+                </div>
+            </mat-tab>
+        </mat-tab-group>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="gap-2">
+    <button mat-button (click)="cancel()">Отмена</button>
+    <button mat-flat-button color="primary" (click)="save()" [disabled]="doctorForm.invalid">
+        <mat-icon class="mr-2"
+            [svgIcon]="mode === 'create' ? 'heroicons_outline:plus' : 'heroicons_outline:check'"></mat-icon>
+        {{ mode === 'create' ? 'Добавить врача' : 'Сохранить изменения' }}
+    </button>
+</mat-dialog-actions>

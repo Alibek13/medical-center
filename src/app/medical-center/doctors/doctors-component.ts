@@ -1,4 +1,5 @@
-import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+// src/app/medical-center/doctors/doctors-component.ts
+import { Component, OnInit, ViewChild, ViewEncapsulation, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -13,24 +14,15 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { FuseCardComponent } from '@fuse/components/card';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
-
-export interface Doctor {
-    id: number;
-    name: string;
-    specialty: string;
-    experience: string;
-    rating: number;
-    reviews: number;
-    price: string;
-    avatar: string;
-    nextSlot: string;
-    status: 'available' | 'busy' | 'offline';
-    email: string;
-    phone: string;
-}
+import { Doctor, DoctorsService } from '../services/doctors-service';
+import { DoctorFormDialogComponent } from '../doctors/doctors-form-dialog/doctor-form-dialog-component';
+import { Subject, takeUntil } from 'rxjs';
+import { UserService } from 'app/core/user/user.service';
 
 @Component({
     selector: 'app-doctors',
@@ -53,169 +45,185 @@ export interface Doctor {
         MatSortModule,
         MatMenuModule,
         MatTooltipModule,
+        MatDialogModule,
+        MatSnackBarModule,
         FuseCardComponent
     ]
 })
-export class DoctorsComponent implements OnInit {
+export class DoctorsComponent implements OnInit, AfterViewInit {
 
-    @ViewChild(MatPaginator) paginator: MatPaginator;
-    @ViewChild(MatSort) sort: MatSort;
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
+    @ViewChild(MatSort) sort!: MatSort;
 
-    displayedColumns: string[] = ['doctor', 'specialty', 'rating', 'price', 'status', 'actions'];
-    dataSource: MatTableDataSource<Doctor>;
+    displayedColumns: string[] = ['doctor', 'specialty', 'rating', 'price', 'actions'];
+    dataSource!: MatTableDataSource<Doctor>;
 
     viewMode: 'grid' | 'list' = 'grid';
-    searchQuery: string = '';
-    selectedSpecialty: string = 'all';
 
-    specialties: string[] = [
-        'Терапевт',
-        'Кардиолог',
-        'Невролог',
-        'ЛОР',
-        'Окулист',
-        'Хирург',
-        'Гинеколог',
-        'Дерматолог',
-        'Стоматолог'
-    ];
+    // Admin mode toggle
+    isAdminMode: boolean = false;
+    userRole: string = '';
 
-    doctors: Doctor[] = [
-        {
-            id: 1,
-            name: 'Абдурахманова Гулжан Жаксыгельдиевна',
-            specialty: 'Терапевт',
-            experience: '15 лет стажа',
-            rating: 4.9,
-            reviews: 127,
-            price: '12 000 ₸',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=doctor1&backgroundColor=c7d2fe',
-            nextSlot: 'Сегодня в 15:00',
-            status: 'available',
-            email: 'a.karimova@medcenter.kz',
-            phone: '+7 777 123 4567'
-        },
-        {
-            id: 2,
-            name: 'Нурлан Сагындыков',
-            specialty: 'Кардиолог',
-            experience: '20 лет стажа',
-            rating: 4.8,
-            reviews: 89,
-            price: '15 000 ₸',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=doctor2&backgroundColor=a5b4fc',
-            nextSlot: 'Завтра в 10:00',
-            status: 'available',
-            email: 'n.sagyndykov@medcenter.kz',
-            phone: '+7 777 234 5678'
-        },
-        {
-            id: 3,
-            name: 'Жанар Мустафина',
-            specialty: 'Невролог',
-            experience: '12 лет стажа',
-            rating: 5.0,
-            reviews: 156,
-            price: '14 000 ₸',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=doctor3&backgroundColor=e0e7ff',
-            nextSlot: 'Сегодня в 17:30',
-            status: 'busy',
-            email: 'zh.mustafina@medcenter.kz',
-            phone: '+7 777 345 6789'
-        },
-        {
-            id: 4,
-            name: 'Арман Байжанов',
-            specialty: 'ЛОР',
-            experience: '8 лет стажа',
-            rating: 4.7,
-            reviews: 64,
-            price: '10 000 ₸',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=doctor4&backgroundColor=c7d2fe',
-            nextSlot: 'Завтра в 14:00',
-            status: 'available',
-            email: 'a.baizhanov@medcenter.kz',
-            phone: '+7 777 456 7890'
-        },
-        {
-            id: 5,
-            name: 'Гульнара Абдуллаева',
-            specialty: 'Окулист',
-            experience: '18 лет стажа',
-            rating: 4.9,
-            reviews: 203,
-            price: '13 000 ₸',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=doctor5&backgroundColor=fce7f3',
-            nextSlot: 'Сегодня в 16:00',
-            status: 'available',
-            email: 'g.abdullaeva@medcenter.kz',
-            phone: '+7 777 567 8901'
-        },
-        {
-            id: 6,
-            name: 'Ержан Касымов',
-            specialty: 'Хирург',
-            experience: '25 лет стажа',
-            rating: 5.0,
-            reviews: 312,
-            price: '20 000 ₸',
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=doctor6&backgroundColor=ddd6fe',
-            nextSlot: 'Завтра в 09:00',
-            status: 'offline',
-            email: 'e.kasymov@medcenter.kz',
-            phone: '+7 777 678 9012'
-        }
-    ];
+    doctors: Doctor[] = [];
 
-    constructor(private location: Location, private router: Router) {
-        this.dataSource = new MatTableDataSource(this.doctors);
+    private _unsubscribeAll: Subject<any> = new Subject<any>();
+
+    constructor(
+        private location: Location,
+        private router: Router,
+        private _doctorsService: DoctorsService,
+        private _dialog: MatDialog,
+        private _snackBar: MatSnackBar,
+        private _userService: UserService
+    ) {
+        this.dataSource = new MatTableDataSource<Doctor>([]);
     }
 
     ngOnInit(): void {
-        // Initialize
+        // Check user role for admin features
+        this._userService.user$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((user: any) => {
+                this.userRole = user?.role || '';
+                // this.isAdminMode = this.userRole === 'admin' || this.userRole === 'manager';
+                this.isAdminMode = true
+                this.updateTableColumns();
+            });
+
+        // Load doctors from service
+        this._doctorsService.doctors$
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((doctors: Doctor[]) => {
+                this.doctors = doctors;
+                this.dataSource.data = doctors;
+            });
+
+        // Initial load
+        this._doctorsService.getDoctors().subscribe();
     }
 
-    ngAfterViewInit() {
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
+    ngAfterViewInit(): void {
+        if (this.paginator) {
+            this.dataSource.paginator = this.paginator;
+        }
+        if (this.sort) {
+            this.dataSource.sort = this.sort;
+        }
+    }
+
+    ngOnDestroy(): void {
+        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.complete();
+    }
+
+    // Update table columns based on admin mode
+    updateTableColumns(): void {
+        if (this.isAdminMode) {
+            this.displayedColumns = ['doctor', 'specialty', 'rating', 'price', 'adminActions'];
+        } else {
+            this.displayedColumns = ['doctor', 'specialty', 'rating', 'price', 'actions'];
+        }
     }
 
     goBack(): void {
         this.router.navigate(['/medical-center/dashboard']);
     }
 
-    applyFilter(event: Event) {
-        const filterValue = (event.target as HTMLInputElement).value;
-        this.dataSource.filter = filterValue.trim().toLowerCase();
-    }
-
-    filterBySpecialty(specialty: string) {
-        if (specialty === 'all') {
-            this.dataSource.data = this.doctors;
-        } else {
-            this.dataSource.data = this.doctors.filter(d => d.specialty === specialty);
-        }
-    }
-
-    toggleViewMode() {
+    toggleViewMode(): void {
         this.viewMode = this.viewMode === 'grid' ? 'list' : 'grid';
     }
 
-    getStatusColor(status: string): string {
-        switch (status) {
-            case 'available': return 'text-green-500';
-            case 'busy': return 'text-orange-500';
-            case 'offline': return 'text-gray-500';
-            default: return 'text-gray-500';
+    // CRUD Operations (Admin only)
+
+    createDoctor(): void {
+        const dialogRef = this._dialog.open(DoctorFormDialogComponent, {
+            width: '900px',
+            maxHeight: '90vh',
+            data: { doctor: null, mode: 'create' }
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                this._doctorsService.createDoctor(result).subscribe({
+                    next: (doctor) => {
+                        this._snackBar.open('Доктор успешно добавлен', 'Закрыть', {
+                            duration: 3000,
+                            horizontalPosition: 'end',
+                            verticalPosition: 'top',
+                            panelClass: ['success-snackbar']
+                        });
+                    },
+                    error: (error) => {
+                        this._snackBar.open('Ошибка при добавлении доктора', 'Закрыть', {
+                            duration: 3000,
+                            panelClass: ['error-snackbar']
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    editDoctor(doctor: Doctor): void {
+        const dialogRef = this._dialog.open(DoctorFormDialogComponent, {
+            width: '900px',
+            maxHeight: '90vh',
+            data: { doctor: { ...doctor }, mode: 'edit' }
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                this._doctorsService.updateDoctor(doctor.id, result).subscribe({
+                    next: (updatedDoctor) => {
+                        this._snackBar.open('Данные доктора обновлены', 'Закрыть', {
+                            duration: 3000,
+                            panelClass: ['success-snackbar']
+                        });
+                    },
+                    error: (error) => {
+                        this._snackBar.open('Ошибка при обновлении данных', 'Закрыть', {
+                            duration: 3000,
+                            panelClass: ['error-snackbar']
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    deleteDoctor(doctor: Doctor): void {
+        if (confirm(`Вы уверены, что хотите удалить доктора ${doctor.name}?\n\nЭто действие нельзя отменить.`)) {
+            this._doctorsService.deleteDoctor(doctor.id).subscribe({
+                next: () => {
+                    this._snackBar.open('Доктор удален', 'Закрыть', {
+                        duration: 3000,
+                        panelClass: ['warning-snackbar']
+                    });
+                },
+                error: (error) => {
+                    this._snackBar.open('Ошибка при удалении доктора', 'Закрыть', {
+                        duration: 3000,
+                        panelClass: ['error-snackbar']
+                    });
+                }
+            });
         }
     }
 
-    getStatusText(status: string): string {
-        switch (status) {
-            case 'available': return 'Доступен';
-            case 'busy': return 'Занят';
-            case 'offline': return 'Не в сети';
-            default: return '';
-        }
+    viewDoctor(doctor: Doctor): void {
+        this.router.navigate(['/medical-center/doctors', doctor.id]);
+    }
+
+    bookAppointment(doctorId: number): void {
+        this.router.navigate(['/medical-center/appointments/booking', doctorId]);
+    }
+
+    // Helper method для обработки ошибки загрузки изображения
+    onImageError(event: any, doctorName: string): void {
+        const colors = ['6366f1', 'ec4899', '10b981', 'f59e0b', '8b5cf6', '06b6d4', 'ef4444'];
+        const hash = doctorName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const color = colors[hash % colors.length];
+        const encodedName = encodeURIComponent(doctorName);
+        event.target.src = `https://ui-avatars.com/api/?name=${encodedName}&background=${color}&color=fff&size=200&rounded=true&bold=true`;
     }
 }

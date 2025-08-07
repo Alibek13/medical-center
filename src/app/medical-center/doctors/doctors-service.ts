@@ -11,8 +11,6 @@ export interface Doctor {
     reviews: number;
     price: string;
     avatar: string;
-    nextSlot: string;
-    status: 'available' | 'busy' | 'offline';
     email: string;
     phone: string;
     bio?: string;
@@ -22,11 +20,11 @@ export interface Doctor {
 }
 
 export interface WorkingHours {
-    monday: { start: string; end: string };
-    tuesday: { start: string; end: string };
-    wednesday: { start: string; end: string };
-    thursday: { start: string; end: string };
-    friday: { start: string; end: string };
+    monday?: { start: string; end: string };
+    tuesday?: { start: string; end: string };
+    wednesday?: { start: string; end: string };
+    thursday?: { start: string; end: string };
+    friday?: { start: string; end: string };
     saturday?: { start: string; end: string };
     sunday?: { start: string; end: string };
 }
@@ -40,7 +38,7 @@ export interface TimeSlot {
     providedIn: 'root'
 })
 export class DoctorsService {
-    
+
     private _doctors: BehaviorSubject<Doctor[]> = new BehaviorSubject<Doctor[]>([]);
     private _doctor: BehaviorSubject<Doctor | null> = new BehaviorSubject<Doctor | null>(null);
 
@@ -96,7 +94,7 @@ export class DoctorsService {
         const slots: TimeSlot[] = [];
         const startHour = 9;
         const endHour = 18;
-        
+
         for (let hour = startHour; hour < endHour; hour++) {
             slots.push({
                 time: `${hour.toString().padStart(2, '0')}:00`,
@@ -107,7 +105,7 @@ export class DoctorsService {
                 available: Math.random() > 0.3
             });
         }
-        
+
         return of(slots);
     }
 
@@ -117,7 +115,7 @@ export class DoctorsService {
             take(1),
             map((doctors) => {
                 const lowercaseQuery = query.toLowerCase();
-                return doctors.filter(doctor => 
+                return doctors.filter(doctor =>
                     doctor.name.toLowerCase().includes(lowercaseQuery) ||
                     doctor.specialty.toLowerCase().includes(lowercaseQuery)
                 );
@@ -182,15 +180,13 @@ export class DoctorsService {
                 rating: 4.9,
                 reviews: 127,
                 price: '12 000 ₸',
-                avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=doctor1&backgroundColor=c7d2fe',
-                nextSlot: 'Сегодня в 15:00',
-                status: 'available',
-                email: 'a.karimova@medcenter.kz',
+                avatar: 'https://ui-avatars.com/api/?name=Гулжан+Абдурахманова&background=6366f1&color=fff&size=200&rounded=true&bold=true',
+                email: 'g.abdurakhmanova@medcenter.kz',
                 phone: '+7 777 123 4567',
-                bio: 'Врач высшей категории. Специализируется на диагностике и лечении заболеваний внутренних органов.',
+                bio: 'Врач высшей категории. Специализируется на ведении беременности, диагностике и лечении гинекологических заболеваний.',
                 education: [
                     'Казахский Национальный Медицинский Университет (2005)',
-                    'Ординатура по терапии (2007)',
+                    'Ординатура по акушерству и гинекологии (2007)',
                     'Повышение квалификации в Германии (2015)'
                 ],
                 languages: ['Казахский', 'Русский', 'Английский'],
@@ -202,7 +198,109 @@ export class DoctorsService {
                     friday: { start: '09:00', end: '17:00' }
                 }
             },
-            // Add more mock doctors...
+            {
+                id: 2,
+                name: 'Сыздыков Марат Кайратович',
+                specialty: 'Кардиолог',
+                experience: '20 лет стажа',
+                rating: 4.8,
+                reviews: 89,
+                price: '15 000 ₸',
+                avatar: 'https://ui-avatars.com/api/?name=Марат+Сыздыков&background=ec4899&color=fff&size=200&rounded=true&bold=true',
+                email: 'm.syzdykov@medcenter.kz',
+                phone: '+7 701 234 5678',
+                bio: 'Доктор медицинских наук. Специалист по диагностике и лечению сердечно-сосудистых заболеваний.',
+                education: [
+                    'Алматинский Государственный Медицинский Институт (2000)',
+                    'Кандидат медицинских наук (2008)',
+                    'Доктор медицинских наук (2015)'
+                ],
+                languages: ['Казахский', 'Русский'],
+                workingHours: {
+                    monday: { start: '08:00', end: '16:00' },
+                    tuesday: { start: '08:00', end: '16:00' },
+                    wednesday: { start: '08:00', end: '16:00' },
+                    thursday: { start: '08:00', end: '16:00' },
+                    friday: { start: '08:00', end: '15:00' }
+                }
+            },
+            {
+                id: 3,
+                name: 'Жанибекова Айгуль Серикбаевна',
+                specialty: 'Педиатр',
+                experience: '12 лет стажа',
+                rating: 5.0,
+                reviews: 203,
+                price: '10 000 ₸',
+                avatar: 'https://ui-avatars.com/api/?name=Айгуль+Жанибекова&background=10b981&color=fff&size=200&rounded=true&bold=true',
+                email: 'a.zhanibekova@medcenter.kz',
+                phone: '+7 705 345 6789',
+                bio: 'Специалист первой категории. Занимается диагностикой и лечением детских заболеваний.',
+                education: [
+                    'Карагандинская Государственная Медицинская Академия (2009)',
+                    'Интернатура по педиатрии (2011)',
+                    'Курсы повышения квалификации (2020)'
+                ],
+                languages: ['Казахский', 'Русский'],
+                workingHours: {
+                    monday: { start: '09:00', end: '18:00' },
+                    tuesday: { start: '09:00', end: '18:00' },
+                    wednesday: { start: '09:00', end: '18:00' },
+                    thursday: { start: '09:00', end: '18:00' },
+                    friday: { start: '09:00', end: '17:00' },
+                    saturday: { start: '10:00', end: '14:00' }
+                }
+            },
+            {
+                id: 4,
+                name: 'Нурпеисов Бауыржан Маратович',
+                specialty: 'Невролог',
+                experience: '8 лет стажа',
+                rating: 4.7,
+                reviews: 56,
+                price: '12 000 ₸',
+                avatar: 'https://ui-avatars.com/api/?name=Бауыржан+Нурпеисов&background=f59e0b&color=fff&size=200&rounded=true&bold=true',
+                email: 'b.nurpeisov@medcenter.kz',
+                phone: '+7 708 456 7890',
+                bio: 'Специализируется на диагностике и лечении заболеваний нервной системы.',
+                education: [
+                    'Астанинский Медицинский Университет (2013)',
+                    'Резидентура по неврологии (2015)'
+                ],
+                languages: ['Казахский', 'Русский', 'Английский'],
+                workingHours: {
+                    monday: { start: '10:00', end: '19:00' },
+                    tuesday: { start: '10:00', end: '19:00' },
+                    wednesday: { start: '10:00', end: '19:00' },
+                    thursday: { start: '10:00', end: '19:00' },
+                    friday: { start: '10:00', end: '18:00' }
+                }
+            },
+            {
+                id: 5,
+                name: 'Касымова Динара Амангельдиевна',
+                specialty: 'Терапевт',
+                experience: '18 лет стажа',
+                rating: 4.9,
+                reviews: 145,
+                price: '8 000 ₸',
+                avatar: 'https://ui-avatars.com/api/?name=Динара+Касымова&background=8b5cf6&color=fff&size=200&rounded=true&bold=true',
+                email: 'd.kassymova@medcenter.kz',
+                phone: '+7 747 567 8901',
+                bio: 'Врач высшей категории. Общая терапевтическая практика, профилактические осмотры.',
+                education: [
+                    'Семипалатинская Государственная Медицинская Академия (2003)',
+                    'Ординатура по внутренним болезням (2005)',
+                    'Повышение квалификации (2019)'
+                ],
+                languages: ['Казахский', 'Русский'],
+                workingHours: {
+                    tuesday: { start: '08:00', end: '17:00' },
+                    wednesday: { start: '08:00', end: '17:00' },
+                    thursday: { start: '08:00', end: '17:00' },
+                    friday: { start: '08:00', end: '16:00' }
+                }
+            }
         ];
 
         this._doctors.next(mockDoctors);

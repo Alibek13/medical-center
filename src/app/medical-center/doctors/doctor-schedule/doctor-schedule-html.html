@@ -1,0 +1,321 @@
+<!-- src/app/medical-center/doctors/doctor-schedule/doctor-schedule-html.html -->
+<div class="doctor-schedule-container">
+    <form [formGroup]="scheduleForm">
+
+        <!-- Header with Quick Actions -->
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-semibold">Настройка расписания</h3>
+            <div class="flex gap-2">
+                <button mat-stroked-button [matMenuTriggerFor]="templateMenu" type="button">
+                    <mat-icon>schedule</mat-icon>
+                    <span class="ml-2">Шаблоны</span>
+                </button>
+                <mat-menu #templateMenu="matMenu">
+                    <button mat-menu-item (click)="applyTemplate('standard')">
+                        <mat-icon>work</mat-icon>
+                        <span>Стандартный (9:00 - 18:00)</span>
+                    </button>
+                    <button mat-menu-item (click)="applyTemplate('extended')">
+                        <mat-icon>more_time</mat-icon>
+                        <span>Расширенный (8:00 - 20:00)</span>
+                    </button>
+                    <button mat-menu-item (click)="applyTemplate('morning')">
+                        <mat-icon>wb_sunny</mat-icon>
+                        <span>Утренняя смена (7:00 - 14:00)</span>
+                    </button>
+                    <button mat-menu-item (click)="applyTemplate('evening')">
+                        <mat-icon>nights_stay</mat-icon>
+                        <span>Вечерняя смена (14:00 - 21:00)</span>
+                    </button>
+                </mat-menu>
+            </div>
+        </div>
+
+        <!-- Slot Duration -->
+        <mat-card class="mb-4">
+            <mat-card-content>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="font-medium mb-2">Длительность приема</h4>
+                        <p class="text-sm text-gray-600">Стандартное время одного приема пациента</p>
+                    </div>
+                    <mat-form-field class="w-48">
+                        <mat-label>Время приема</mat-label>
+                        <mat-select formControlName="slotDuration">
+                            <mat-option *ngFor="let duration of slotDurations" [value]="duration.value">
+                                {{ duration.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Tabs for Different Sections -->
+        <mat-tab-group>
+
+            <!-- Weekly Schedule Tab -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <mat-icon class="mr-2">calendar_view_week</mat-icon>
+                    Недельное расписание
+                </ng-template>
+
+                <div class="pt-4">
+                    <!-- Quick Actions -->
+                    <div class="flex justify-end mb-4">
+                        <button mat-stroked-button type="button" (click)="copyToWeekdays()">
+                            <mat-icon>content_copy</mat-icon>
+                            <span class="ml-2">Копировать понедельник на будни</span>
+                        </button>
+                    </div>
+
+                    <!-- Days Schedule -->
+                    <div formArrayName="workDays" class="space-y-3">
+                        <mat-expansion-panel *ngFor="let day of workDaysArray.controls; let i = index"
+                            [expanded]="getWorkDay(i).get('enabled')?.value" class="schedule-day-panel">
+                            <mat-expansion-panel-header>
+                                <mat-panel-title class="flex items-center justify-between w-full">
+                                    <div class="flex items-center">
+                                        <mat-slide-toggle [formControl]="getWorkDay(i).get('enabled')"
+                                            (click)="$event.stopPropagation()" class="mr-4">
+                                        </mat-slide-toggle>
+                                        <span class="font-medium">{{ weekDays[i].label }}</span>
+                                    </div>
+                                    <div *ngIf="getWorkDay(i).get('enabled')?.value" class="text-sm text-gray-600">
+                                        <span *ngIf="getWorkHours(i).at(0).get('start')?.value">
+                                            {{ getWorkHours(i).at(0).get('start')?.value }} -
+                                            {{ getWorkHours(i).at(0).get('end')?.value }}
+                                        </span>
+                                    </div>
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
+
+                            <div [formGroup]="getWorkDay(i)" class="pt-4">
+                                <!-- Work Hours -->
+                                <div class="mb-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <label class="text-sm font-medium">Рабочие часы</label>
+                                        <button mat-icon-button type="button" (click)="addWorkHourRange(i)"
+                                            matTooltip="Добавить временной интервал">
+                                            <mat-icon>add_circle</mat-icon>
+                                        </button>
+                                    </div>
+
+                                    <div formArrayName="workHours" class="space-y-2">
+                                        <div *ngFor="let range of getWorkHours(i).controls; let j = index"
+                                            [formGroup]="range" class="flex items-center gap-3">
+                                            <mat-form-field class="flex-1">
+                                                <mat-label>Начало</mat-label>
+                                                <mat-select formControlName="start">
+                                                    <mat-option *ngFor="let time of timeSlots" [value]="time">
+                                                        {{ time }}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+
+                                            <span class="text-gray-500">—</span>
+
+                                            <mat-form-field class="flex-1">
+                                                <mat-label>Конец</mat-label>
+                                                <mat-select formControlName="end">
+                                                    <mat-option *ngFor="let time of timeSlots" [value]="time">
+                                                        {{ time }}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+
+                                            <button mat-icon-button type="button" (click)="removeWorkHourRange(i, j)"
+                                                *ngIf="getWorkHours(i).length > 1" class="text-red-500">
+                                                <mat-icon>remove_circle</mat-icon>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </mat-expansion-panel>
+                    </div>
+                </div>
+            </mat-tab>
+
+            <!-- Breaks Tab -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <mat-icon class="mr-2">coffee</mat-icon>
+                    Перерывы
+                </ng-template>
+
+                <div class="pt-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <p class="text-sm text-gray-600">
+                            Настройте регулярные перерывы в расписании
+                        </p>
+                        <button mat-flat-button color="primary" type="button" (click)="addBreak()">
+                            <mat-icon>add</mat-icon>
+                            <span class="ml-2">Добавить перерыв</span>
+                        </button>
+                    </div>
+
+                    <div formArrayName="breaks" class="space-y-3">
+                        <mat-card *ngFor="let breakTime of breaksArray.controls; let i = index" [formGroup]="breakTime">
+                            <mat-card-content>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <mat-form-field>
+                                        <mat-label>Название</mat-label>
+                                        <input matInput formControlName="name" placeholder="Обеденный перерыв">
+                                    </mat-form-field>
+
+                                    <div class="flex gap-2">
+                                        <mat-form-field class="flex-1">
+                                            <mat-label>Начало</mat-label>
+                                            <mat-select formControlName="start">
+                                                <mat-option *ngFor="let time of timeSlots" [value]="time">
+                                                    {{ time }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+
+                                        <mat-form-field class="flex-1">
+                                            <mat-label>Конец</mat-label>
+                                            <mat-select formControlName="end">
+                                                <mat-option *ngFor="let time of timeSlots" [value]="time">
+                                                    {{ time }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <mat-form-field class="md:col-span-2">
+                                        <mat-label>Применить к дням</mat-label>
+                                        <mat-select formControlName="applyToDays" multiple>
+                                            <mat-option *ngFor="let day of weekDays" [value]="day.value">
+                                                {{ day.label }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="flex justify-end">
+                                    <button mat-icon-button type="button" (click)="removeBreak(i)" color="warn">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+                    </div>
+
+                    <div *ngIf="breaksArray.length === 0" class="text-center py-8 text-gray-500">
+                        <mat-icon class="text-6xl mb-2">coffee</mat-icon>
+                        <p>Перерывы не настроены</p>
+                    </div>
+                </div>
+            </mat-tab>
+
+            <!-- Special Dates Tab -->
+            <mat-tab>
+                <ng-template mat-tab-label>
+                    <mat-icon class="mr-2">event_busy</mat-icon>
+                    Особые дни
+                </ng-template>
+
+                <div class="pt-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <p class="text-sm text-gray-600">
+                            Отметьте выходные, отпуска и другие особые дни
+                        </p>
+                        <button mat-flat-button color="primary" type="button" (click)="addSpecialDate()">
+                            <mat-icon>add</mat-icon>
+                            <span class="ml-2">Добавить</span>
+                        </button>
+                    </div>
+
+                    <div formArrayName="specialDates" class="space-y-3">
+                        <mat-card *ngFor="let specialDate of specialDatesArray.controls; let i = index"
+                            [formGroup]="specialDate">
+                            <mat-card-content>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <mat-form-field>
+                                        <mat-label>Дата</mat-label>
+                                        <input matInput [matDatepicker]="picker" formControlName="date">
+                                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                                        <mat-datepicker #picker></mat-datepicker>
+                                    </mat-form-field>
+
+                                    <mat-form-field>
+                                        <mat-label>Тип</mat-label>
+                                        <mat-select formControlName="type">
+                                            <mat-option *ngFor="let type of specialDateTypes" [value]="type.value">
+                                                <mat-icon class="mr-2">{{ type.icon }}</mat-icon>
+                                                {{ type.label }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field class="md:col-span-2">
+                                        <mat-label>Описание</mat-label>
+                                        <input matInput formControlName="description"
+                                            placeholder="Например: Медицинская конференция">
+                                    </mat-form-field>
+
+                                    <div class="md:col-span-2">
+                                        <mat-slide-toggle formControlName="isFullDay">
+                                            Весь день
+                                        </mat-slide-toggle>
+
+                                        <div *ngIf="!specialDate.get('isFullDay')?.value" formGroupName="timeRange"
+                                            class="flex gap-2 mt-3">
+                                            <mat-form-field class="flex-1">
+                                                <mat-label>С</mat-label>
+                                                <mat-select formControlName="start">
+                                                    <mat-option *ngFor="let time of timeSlots" [value]="time">
+                                                        {{ time }}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+
+                                            <mat-form-field class="flex-1">
+                                                <mat-label>До</mat-label>
+                                                <mat-select formControlName="end">
+                                                    <mat-option *ngFor="let time of timeSlots" [value]="time">
+                                                        {{ time }}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-end">
+                                    <button mat-icon-button type="button" (click)="removeSpecialDate(i)" color="warn">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+                    </div>
+
+                    <div *ngIf="specialDatesArray.length === 0" class="text-center py-8 text-gray-500">
+                        <mat-icon class="text-6xl mb-2">event_available</mat-icon>
+                        <p>Особые дни не отмечены</p>
+                    </div>
+                </div>
+            </mat-tab>
+        </mat-tab-group>
+
+        <!-- Summary -->
+        <mat-card class="mt-6">
+            <mat-card-content>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="font-medium mb-1">Итого рабочих часов в неделю</h4>
+                        <p class="text-2xl font-bold text-primary">{{ calculateWorkHours() }} часов</p>
+                    </div>
+                    <button mat-flat-button color="primary" type="button" (click)="saveSchedule()">
+                        <mat-icon>save</mat-icon>
+                        <span class="ml-2">Сохранить расписание</span>
+                    </button>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </form>
+</div>

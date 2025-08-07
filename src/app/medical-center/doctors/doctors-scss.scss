@@ -1,91 +1,492 @@
-app-doctors {
+// src/app/medical-center/doctors/doctors-scss.scss
 
-    /* Общая шапка всех внутренних экранов */
-    .page-header {
-        @apply border-b bg-card dark:bg-transparent p-6 sm:p-8 sm:pl-10 flex flex-col sm:flex-row sm:items-center sm:justify-between;
+// Existing styles (keep your current styles and add these)
 
-        /* убрали не‑существующий класс flex-0 → flex-none */
-        @apply flex-none;
+// Admin mode indicator badge
+.admin-badge {
+    animation: pulse 2s infinite;
+
+    mat-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
     }
 
-    /* Название страницы */
-    .page-title {
-        @apply text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate;
+    50% {
+        opacity: 0.7;
     }
+}
 
-    /* Блок счётчика/иконки под заголовком */
-    .info {
-        @apply flex items-center mt-1;
-    }
+// Stats cards with hover effect
+fuse-card {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 
-    /* Колонка действий (кнопки / переключатель вида) */
-    .actions {
-        @apply flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4;
-    }
-
-    /* Фиксация статусов врачей, переиспользуется в grid и list */
-    .status-available {
-        @apply bg-green-100 text-green-700;
-    }
-
-    .status-unavailable {
-        @apply bg-gray-100 text-gray-700;
-    }
-
-    /* Исправленные классы time‑slot (оставил здесь, если нужны) */
-    .time-slot-available {
-        @apply border-gray-300 hover:border-primary hover:bg-primary-50 cursor-pointer;
-    }
-
-    .time-slot-selected {
-        @apply bg-primary text-white border-primary;
-    }
-
-    .time-slot-disabled {
-        @apply bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed;
-    }
-
-    // Grid view animations
-    .doctor-card {
-        @apply transition-all duration-300 ease-in-out;
+    &.cursor-pointer {
+        cursor: pointer;
 
         &:hover {
-            @apply transform -translate-y-1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+    }
+}
 
-            img {
-                @apply transform scale-110;
+// Status badges and buttons
+.status-badge {
+    transition: all 0.2s ease;
+
+    &.clickable {
+        cursor: pointer;
+
+        &:hover {
+            transform: scale(1.05);
+        }
+    }
+}
+
+// Table styles
+.mat-mdc-table {
+    .mat-mdc-header-row {
+        background-color: rgba(0, 0, 0, 0.02);
+
+        .mat-mdc-header-cell {
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.87);
+        }
+    }
+
+    .mat-mdc-row {
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+    }
+}
+
+// Dark theme adjustments
+:host-context(.dark) {
+    .mat-mdc-table {
+        .mat-mdc-header-row {
+            background-color: rgba(255, 255, 255, 0.02);
+
+            .mat-mdc-header-cell {
+                color: rgba(255, 255, 255, 0.87);
             }
         }
 
-        img {
-            @apply transition-transform duration-300;
-        }
-    }
-
-    // Status chip colors
-    .mat-mdc-chip {
-        &.text-green-500 {
-            @apply bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300;
-        }
-
-        &.text-orange-500 {
-            @apply bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300;
-        }
-
-        &.text-gray-500 {
-            @apply bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300;
-        }
-    }
-
-    // Table hover effects
-    .mat-mdc-table {
         .mat-mdc-row {
-            @apply transition-colors duration-200;
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.02);
+            }
+        }
+    }
+}
+
+// Grid view cards
+.doctor-card {
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .doctor-avatar {
+        transition: transform 0.3s ease;
+
+        &:hover {
+            transform: scale(1.1);
+        }
+    }
+}
+
+// Filters section
+.filters-section {
+    mat-form-field {
+        .mat-mdc-text-field-wrapper {
+            background-color: rgba(0, 0, 0, 0.02);
+
+            &:hover {
+                background-color: rgba(0, 0, 0, 0.04);
+            }
+        }
+    }
+}
+
+:host-context(.dark) {
+    .filters-section {
+        mat-form-field {
+            .mat-mdc-text-field-wrapper {
+                background-color: rgba(255, 255, 255, 0.02);
+
+                &:hover {
+                    background-color: rgba(255, 255, 255, 0.04);
+                }
+            }
+        }
+    }
+}
+
+// Status colors
+.text-green-600 {
+    color: #10b981;
+}
+
+.bg-green-100 {
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+.text-amber-600 {
+    color: #f59e0b;
+}
+
+.bg-amber-100 {
+    background-color: rgba(245, 158, 11, 0.1);
+}
+
+.text-gray-600 {
+    color: #6b7280;
+}
+
+.bg-gray-100 {
+    background-color: rgba(107, 114, 128, 0.1);
+}
+
+// Snackbar custom styles
+::ng-deep {
+    .mat-mdc-snack-bar-container {
+        &.success-snackbar {
+            --mdc-snackbar-container-color: #10b981;
+            --mdc-snackbar-supporting-text-color: white;
+
+            .mat-mdc-button {
+                color: white;
+            }
+        }
+
+        &.error-snackbar {
+            --mdc-snackbar-container-color: #ef4444;
+            --mdc-snackbar-supporting-text-color: white;
+
+            .mat-mdc-button {
+                color: white;
+            }
+        }
+
+        &.warning-snackbar {
+            --mdc-snackbar-container-color: #f59e0b;
+            --mdc-snackbar-supporting-text-color: white;
+
+            .mat-mdc-button {
+                color: white;
+            }
+        }
+    }
+}
+
+// Action buttons
+.action-buttons {
+    display: flex;
+    gap: 4px;
+
+    button {
+        transition: all 0.2s ease;
+
+        &:hover {
+            transform: scale(1.1);
+        }
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 959px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .doctor-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 599px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .doctor-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filters-section {
+        flex-direction: column;
+
+        mat-form-field {
+            width: 100%;
         }
     }
 
-    // Filter section
-    .filter-section {
-        @apply sticky top-0 z-10 bg-card;
+    // Hide some table columns on mobile
+    .mat-mdc-table {
+
+        .mat-column-rating,
+        .mat-column-price {
+            display: none;
+        }
+    }
+}
+
+
+// src/app/medical-center/doctors/doctors-scss.scss
+
+// Existing styles (keep your current styles and add these)
+
+// Admin mode indicator badge
+.admin-badge {
+    animation: pulse 2s infinite;
+
+    mat-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+// Stats cards with hover effect
+fuse-card {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+    &.cursor-pointer {
+        cursor: pointer;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+    }
+}
+
+// Status badges and buttons
+.status-badge {
+    transition: all 0.2s ease;
+
+    &.clickable {
+        cursor: pointer;
+
+        &:hover {
+            transform: scale(1.05);
+        }
+    }
+}
+
+// Table styles
+.mat-mdc-table {
+    .mat-mdc-header-row {
+        background-color: rgba(0, 0, 0, 0.02);
+
+        .mat-mdc-header-cell {
+            font-weight: 600;
+            color: rgba(0, 0, 0, 0.87);
+        }
+    }
+
+    .mat-mdc-row {
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+    }
+}
+
+// Dark theme adjustments
+:host-context(.dark) {
+    .mat-mdc-table {
+        .mat-mdc-header-row {
+            background-color: rgba(255, 255, 255, 0.02);
+
+            .mat-mdc-header-cell {
+                color: rgba(255, 255, 255, 0.87);
+            }
+        }
+
+        .mat-mdc-row {
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.02);
+            }
+        }
+    }
+}
+
+// Grid view cards
+.doctor-card {
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .doctor-avatar {
+        transition: transform 0.3s ease;
+
+        &:hover {
+            transform: scale(1.1);
+        }
+    }
+}
+
+// Filters section
+.filters-section {
+    mat-form-field {
+        .mat-mdc-text-field-wrapper {
+            background-color: rgba(0, 0, 0, 0.02);
+
+            &:hover {
+                background-color: rgba(0, 0, 0, 0.04);
+            }
+        }
+    }
+}
+
+:host-context(.dark) {
+    .filters-section {
+        mat-form-field {
+            .mat-mdc-text-field-wrapper {
+                background-color: rgba(255, 255, 255, 0.02);
+
+                &:hover {
+                    background-color: rgba(255, 255, 255, 0.04);
+                }
+            }
+        }
+    }
+}
+
+// Status colors
+.text-green-600 {
+    color: #10b981;
+}
+
+.bg-green-100 {
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+.text-amber-600 {
+    color: #f59e0b;
+}
+
+.bg-amber-100 {
+    background-color: rgba(245, 158, 11, 0.1);
+}
+
+.text-gray-600 {
+    color: #6b7280;
+}
+
+.bg-gray-100 {
+    background-color: rgba(107, 114, 128, 0.1);
+}
+
+// Snackbar custom styles
+::ng-deep {
+    .mat-mdc-snack-bar-container {
+        &.success-snackbar {
+            --mdc-snackbar-container-color: #10b981;
+            --mdc-snackbar-supporting-text-color: white;
+
+            .mat-mdc-button {
+                color: white;
+            }
+        }
+
+        &.error-snackbar {
+            --mdc-snackbar-container-color: #ef4444;
+            --mdc-snackbar-supporting-text-color: white;
+
+            .mat-mdc-button {
+                color: white;
+            }
+        }
+
+        &.warning-snackbar {
+            --mdc-snackbar-container-color: #f59e0b;
+            --mdc-snackbar-supporting-text-color: white;
+
+            .mat-mdc-button {
+                color: white;
+            }
+        }
+    }
+}
+
+// Action buttons
+.action-buttons {
+    display: flex;
+    gap: 4px;
+
+    button {
+        transition: all 0.2s ease;
+
+        &:hover {
+            transform: scale(1.1);
+        }
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 959px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .doctor-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 599px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .doctor-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filters-section {
+        flex-direction: column;
+
+        mat-form-field {
+            width: 100%;
+        }
+    }
+
+    // Hide some table columns on mobile
+    .mat-mdc-table {
+
+        .mat-column-rating,
+        .mat-column-price {
+            display: none;
+        }
     }
 }

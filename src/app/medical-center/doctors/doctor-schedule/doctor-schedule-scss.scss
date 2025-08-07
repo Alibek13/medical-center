@@ -1,0 +1,228 @@
+// src/app/medical-center/doctors/doctor-schedule/doctor-schedule-scss.scss
+
+.doctor-schedule-container {
+    padding: 1rem;
+
+    // Schedule day panels
+    .schedule-day-panel {
+        &.mat-expansion-panel {
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+
+            &.mat-expanded {
+                background-color: rgba(99, 102, 241, 0.05);
+                border-color: rgba(99, 102, 241, 0.3);
+            }
+
+            .mat-expansion-panel-header {
+                &:hover {
+                    background-color: transparent !important;
+                }
+
+                .mat-expansion-panel-header-title {
+                    flex-grow: 1;
+                }
+            }
+        }
+
+        // Disabled state
+        &:has(.mat-mdc-slide-toggle:not(.mat-mdc-slide-toggle-checked)) {
+            opacity: 0.6;
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+    }
+
+    // Time range inputs
+    .time-range-group {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+
+        .time-separator {
+            color: rgba(0, 0, 0, 0.38);
+            font-weight: 500;
+        }
+    }
+
+    // Break cards
+    .break-card {
+        border-left: 4px solid #f59e0b;
+
+        &:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    // Special date cards
+    .special-date-card {
+        position: relative;
+        overflow: hidden;
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        &.holiday::before {
+            background-color: #6366f1;
+        }
+
+        &.conference::before {
+            background-color: #8b5cf6;
+        }
+
+        &.sick-leave::before {
+            background-color: #ef4444;
+        }
+
+        &.vacation::before {
+            background-color: #06b6d4;
+        }
+    }
+
+    // Template menu
+    .template-option {
+        .mat-icon {
+            margin-right: 8px;
+        }
+    }
+
+    // Summary card
+    .summary-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+
+        .mat-card-content {
+            color: white;
+        }
+    }
+
+    // Dark theme
+    :host-context(.dark) & {
+        .schedule-day-panel {
+            &.mat-expansion-panel {
+                border-color: rgba(255, 255, 255, 0.12);
+
+                &.mat-expanded {
+                    background-color: rgba(99, 102, 241, 0.1);
+                    border-color: rgba(99, 102, 241, 0.4);
+                }
+            }
+
+            &:has(.mat-mdc-slide-toggle:not(.mat-mdc-slide-toggle-checked)) {
+                background-color: rgba(255, 255, 255, 0.02);
+            }
+        }
+
+        .time-range-group {
+            .time-separator {
+                color: rgba(255, 255, 255, 0.38);
+            }
+        }
+    }
+
+    // Mobile responsive
+    @media (max-width: 640px) {
+        padding: 0.5rem;
+
+        .mat-expansion-panel-header {
+            padding: 0 16px;
+        }
+
+        .time-range-group {
+            flex-direction: column;
+
+            .time-separator {
+                display: none;
+            }
+
+            mat-form-field {
+                width: 100%;
+            }
+        }
+
+        .mat-tab-group {
+            .mat-tab-label {
+                min-width: auto;
+                padding: 0 12px;
+
+                .mat-icon {
+                    margin-right: 4px;
+                }
+            }
+        }
+    }
+}
+
+// Animations
+@keyframes slideIn {
+    from {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.schedule-day-panel {
+    animation: slideIn 0.3s ease-out;
+    animation-fill-mode: both;
+
+    @for $i from 1 through 7 {
+        &:nth-child(#{$i}) {
+            animation-delay: #{$i * 0.05}s;
+        }
+    }
+}
+
+// Custom scrollbar for time selects
+.mat-select-panel {
+    max-height: 280px !important;
+
+    &::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+    }
+}
+
+// Status indicators
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+
+    &.active {
+        background-color: #10b981;
+    }
+
+    &.inactive {
+        background-color: #ef4444;
+    }
+
+    &.partial {
+        background-color: #f59e0b;
+    }
+}

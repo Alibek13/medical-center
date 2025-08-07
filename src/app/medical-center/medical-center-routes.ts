@@ -35,7 +35,7 @@ export default [
                         path: '',
                         loadComponent: () => import('../medical-center/appointments/appointments-component').then(m => m.AppointmentsComponent)
                     },
-                                       {
+                    {
                         path: 'booking',
                         loadComponent: () => import('../medical-center/appointments/booking/booking-component').then(m => m.BookingComponent)
                     },
