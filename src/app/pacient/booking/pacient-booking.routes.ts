@@ -1,11 +1,11 @@
 import { Routes } from '@angular/router';
-import { BookingComponent } from './booking.component';
+import { PacientBookingComponent } from './pacient-booking.component';
 
 /** Lazy‑роут: /booking  (layout 'empty' = без сайд‑бара Fuse) */
-export const BOOKING_ROUTES: Routes = [
+export const PACIENT_BOOKING_ROUTES: Routes = [
   {
     path: '',
-    component: BookingComponent,
+    component: PacientBookingComponent,
     data: { layout: 'empty' }
   }
 ];

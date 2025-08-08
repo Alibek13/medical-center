@@ -41,11 +41,11 @@ import { FuseCardComponent } from '@fuse/components/card';
 import {
     DoctorsService,
     TimeSlot
-} from '../medical-center/services/doctors-service';
+} from '../../medical-center/services/doctors-service';
 import {
     AppointmentsService,
     CreateAppointmentDto
-} from '../medical-center/services/appointments-service';
+} from '../../medical-center/services/appointments-service';
 
 /* Интерфейсы */
 export interface Doctor {
@@ -103,11 +103,11 @@ export interface WorkingHours {
         /* Fuse */
         FuseCardComponent
     ],
-    templateUrl: './booking.component.html',
-    styleUrls: ['./booking.component.scss'],
+    templateUrl: './pacient-booking.component.html',
+    styleUrls: ['./pacient-booking.component.scss'],
     //   encapsulation: ViewEncapsulation.None
 })
-export class BookingComponent implements OnInit, AfterViewInit {
+export class PacientBookingComponent implements OnInit, AfterViewInit {
 
     /* ────── DI ────── */
     private doctorsSrv = inject(DoctorsService);

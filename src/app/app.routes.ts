@@ -22,7 +22,7 @@ export const appRoutes: Route[] = [
             {
                 path: 'landing',
                 loadChildren: () =>
-                    import('./landing/landing.routes').then(m => m.LANDING_ROUTES)
+                    import('./pacient/landing/landing.routes').then(m => m.LANDING_ROUTES)
             }
         ]
     },
@@ -86,7 +86,7 @@ export const appRoutes: Route[] = [
     {
         path: 'booking',
         loadChildren: () =>
-            import('./booking/booking.routes').then(m => m.BOOKING_ROUTES)
+            import('./pacient/booking/pacient-booking.routes').then(m => m.PACIENT_BOOKING_ROUTES)
     },
 
     /* ─────────────────────────────────────────────
