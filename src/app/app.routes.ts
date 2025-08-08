@@ -86,7 +86,7 @@ export const appRoutes: Route[] = [
     {
         path: 'booking',
         loadChildren: () =>
-            import('../app/booking/booking.routes').then(m => m.PATIENT_BOOKING_ROUTES)
+            import('./booking/booking.routes').then(m => m.BOOKING_ROUTES)
     },
 
     /* ─────────────────────────────────────────────
